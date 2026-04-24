@@ -1,0 +1,622 @@
+SYSTEM = ships's HUD
+COMMAND = Commander SP8S
+CERES
+HERMES
+DIDYMOS
+PLAYER - Apophis
+OCTOBIT
+PETA
+
+CHAPTER 1 - CONTACT
+
+	Level 1 - Approach
+		SYSTEM: Approaching Earth orbit.
+		SYSTEM: Patrol route confirmed.
+		COMMAND: Apophis, report status.
+		PLAYER: Clear approach. No hostile activity detected.
+		COMMAND: Roger that. Proceed your course to Earth.
+		(intro on PLAYER movement - mouse or arrow keys)
+		
+	Level 2 - First Contact
+		(small wave of enemies - not attacking yet)
+		SYSTEM: Unidentified signatures detected.
+		PLAYER: Command, I'm seeing contacts on my radar. No transponder data.
+		COMMAND: Acknowledged. Monitor them and engage if necessary.
+		(wave of enemies attacks)
+		SYSTEM: Warning. Hostile activity detected!
+		(tip on screen: press LeftClick / or Space to fire)
+		
+	Level 3 - Escalation
+		(2-3 waves with larger structures)
+		SYSTEM: Multiple signatures inbound.
+		PLAYER: Their formations are ... tight. Not sure how much I can cope with this.
+		COMMAND: Sensors are still calibrating. Stand by.
+		(brief delay)
+		SYSTEM: Large signature count detected.
+		
+	Level 4 - Squadron Arrival
+		(friendly ships enter the field briefly, quickly flying in the background before exiting the screen)
+		HERMES: Took you long enough to find some action, Apophis.
+		CERES: Focus up, team. These are not your usual aliens.
+		PLAYER: Good you see you guys!
+		(2 waves with slightly smaller count of aliens).
+		
+	Level 5 - Malfunction
+		SYSTEM: Ally signal unstable.
+		DIDYMOS: Uhm, command, I'm reading power fluctuations in my ship. 
+		(wave of enemies)
+		DIDYMOS: Controls feel sluggish. I'm losing power in my thrusters.
+		CERES: Didymos, pull back.
+		DIDYMOS: Roger that.
+		(show animation of Didymos ship flying, and then exploding)
+		(pause for a few seconds)
+		SYSTEM: Ally signal lost!
+		
+	Level 6 - Aftermath
+		(2 smaller waves of enemies)
+		PLAYER: ...Didymos?
+		(static)
+		COMMAND: Apophis, report status!
+		PLAYER: I saw... an explosion. Didymos... he's down.
+		SYSTEM: Emergency beacon detected. Trajectory: unknown.
+		(pause)
+		CERES: That wasn't an accident. His systems were hacked.
+		(wave of enemies)
+	
+	Level 7 - The Extractor
+		SYSTEM: Massive energy signature detected.
+		PLAYER: That thing isn't here to fight.
+		ENEMY UNIT: Specimen secured. Prepare system jump.
+		(boss fight)
+		
+	End of chapter - Choice
+		SYSTEM: System jump detected. Trajectory: deep space.
+		PLAYER: Commander, request permission to pursuit.
+		COMMAND: Denied. Regroup at Earth.
+		(pause)
+		PLAYER: Negative, command. I'm going after Didymos.
+		COMMAND: Apophis, stand down! Regroup with the rest of the squadron at Earth!
+		(pause)
+		SYSTEM: System jump initiated. Destination: Triangulum Galaxy.
+		COMMAND: APOPHIS! STAND DOWN IMMEDIATELY!
+		PLAYER: Sorry, command. We don't leave anyone behind.
+		SYSTEM: 3, 2, 1... engage jump.
+		(PLAYER jumps and chapter ends.)
+
+Dialogue in between Chapter I and II:
+	COMMAND: Apophis! STAND DOWN!	
+	(image of a large flash in deep space - signal of a space jump initiated)
+	HERMES: He's gone!
+	COMMAND: DAMMIT!
+	CERES: Our squadron is reduced to half now, command... 
+	COMMAND: *sigh*
+	(pause)
+	COMMAND: Ceres, form a defensive perimeter around Earth. Expect further incursions.
+	CERES: Roger that. Can you establish a connection with Apophis in deep space?
+	COMMAND: Sensors are still detecting his signal, not sure if....
+	HERMES: Contact!!!
+	(aliens appear in Milky Way)
+
+CHAPTER 2 - The Pursuit
+
+	Level 1 - Deep Space Entry
+		SYSTEM: System jump complete.
+		(small wave of enemies)
+		SYSTEM: Unidentified residue detected. 
+		(small wave of enemies)
+
+	Level 2 - First Harvest
+		SYSTEM: Residue absorbed.
+		(2 waves of enemies - 1 small, 1 medium)
+		SYSTEM: Material analysis in progress...
+		(1 medium wave of enemies)
+
+	Level 3 - Recognition
+		SYSTEM: Analysis complete.
+		(1 large wave of enemies)
+		SYSTEM: Material identified: Plutonium-based organic compound.
+		(pause)
+		SYSTEM: Energy density: high.
+		(1 large wave of enemies)
+		SYSTEM: Analysing compatibility with ship's modules...
+		(1 large wave of enemies)
+
+	Level 4 - Adaptation
+		COMMAND: Apophis, do you copy?
+		PLAYER: Loud and clear, sir.
+		(2 medium waves of enemies)
+		COMMAND:  Your ship's telemetry is... unusual.
+		PLAYER: Not sure what you're talking about, command.
+		COMMAND: I'm seeing internal power fluctuations.
+		SYSTEM: Analysis complete.
+		(1 medium wave of enemies)
+		SYSTEM: Compatibility with ship modules detected.
+		SYSTEM: Enhancement potential: limited.
+		SYSTEM: Optimization required.
+		(1 large wave of enemies)
+		COMMAND: Amazing. Your ship is adapting to the aliens' tissue.
+
+	Level 5 - Commitment
+		SYSTEM: Warning. Large energy signatures detected.
+		(3 large waves of enemies)
+		PLAYER: They're trying to slow me down.
+		COMMAND: They are clearly aware of your pursuit. Blast every single one of them.
+		PLAYER: With pleasure.
+		(2 large waves of enemies)
+		PLAYER: System, give me a status on Didymos' signal.
+		SYSTEM: Target is heading towards Oreus Galaxy.
+		PLAYER: Roger that, initiate system jump.
+		SYSTEM: Acknowledged.
+		(1 medium + 1 small wave of enemies)
+		SYSTEM: System jump ready.
+		PLAYER: Engage.
+		(animation or image of system jump).
+
+(no boss fight here).
+
+CHAPTER 3 - INTERFERENCE
+Level 1 - Static
+	SYSTEM: Jump complete. Entering Oreus outer rim.
+	(asteroid field - sparse, no enemies)
+	COMMAND: ...*&4%$*^&!
+	PLAYER: Command?
+	(asteroid field - enemies)
+	OCTOBIT: How predictable.
+
+Level 2 - Noise
+	SYSTEM: Low-level contacts detected.
+	(1 small wave of enemies)
+	PLAYER: System, initiate sensor injection.
+	(1 small wave of enemies)
+	PLAYER: They're not attacking. They're watching.
+
+Level 3 - Frequency
+	SYSTEM: Unknown signal detected. Frequency: unclassified.
+	(1 medium wave of enemies)
+	COMMAND: Apophis, I'm picking up that signal too. Do not engage it directly.
+	PLAYER: Understood.
+	(1 medium wave of enemies)
+	SYSTEM: Signal strength: increasing.
+
+Level 4 - Transmission
+	SYSTEM: Incoming transmission.
+	(pause)
+	OCTOBIT: You are further than expected.
+	(pause)
+	PLAYER: Who is this?
+	(no response)
+	(1 large wave of enemies - sudden, aggressive)
+	SYSTEM: Warning. Hostile surge detected.
+
+Level 5 - Pressure
+	(2 large waves of enemies)
+	PLAYER: Command, that transmission — did you receive it?
+	COMMAND: Negative. Your comms are being filtered.
+	(2 large waves of enemies)
+	SYSTEM: Signal interference: increasing.
+	PLAYER: I'm not stopping. Not without Didymos.
+	(1 large wave of enemies)
+	SYSTEM: Communication link: degraded.
+
+Level 6 - Identity
+	SYSTEM: Signal source triangulated.
+	(pause)
+	OCTOBIT: Impressive endurance.
+	(pause)
+	OCTOBIT: It won't matter.
+	(pause)
+	SYSTEM: Signal origin confirmed.
+	SYSTEM: Designation: OctoBit.
+	(pause)
+	PLAYER: ...So it's you.
+	(silence)
+	SYSTEM: Warning. Massive energy signature detected.
+
+Level 7 - The Interdictor
+	SYSTEM: Warning. Large signature detected.
+	PLAYER: Command, I have a massive contact ahead.
+	COMMAND: (static)
+	PLAYER: Command?
+	(silence)
+	(boss fight)
+
+End of Chapter 3
+	(boss destroyed)
+	SYSTEM: Contact eliminated. Communication link restoring...
+	(pause)
+	COMMAND: Apophis... copy?
+	PLAYER: Say again, command. My comms are still jammed.
+	(pause)
+	COMMAND: We couldn't reach you. What happened out there?
+	PLAYER: OctoBit. He reached me first.
+	COMMAND: *sigh*. You're alive.
+	OCTOBIT: For now.
+	
+
+CHATPER 4 - DECEPTION
+
+Level 1 - Drift
+	SYSTEM: Entering Oreus inner region.
+	(sparse asteroid field, 1 small wave of enemies)
+	COMMAND: Apophis, good to have you back on comms.
+	PLAYER: Signal's still patchy on my end, command.
+	(1 small wave of enemies)
+
+Level 2 - Guidance
+	(2 medium waves of enemies)
+	COMMAND: We've been tracking the signal. It's shifted bearing.
+	PLAYER: Bearing received. Adjusting course.
+	(pause)
+	COMMAND: New heading: bearing 227. Adjust immediately.
+	PLAYER: ...Roger that.
+
+Level 3 - Redirect
+	(1 large wave of enemies)
+	COMMAND: Signal is weakening on your current heading. Fall back 40 clicks.
+	PLAYER: Negative. Signal trace is still strong on my end.
+	COMMAND: I'm telling you. Fall back.
+	(1 large wave of enemies)
+	PLAYER: Something's off.
+
+Level 4 - Doubt
+	SYSTEM: Signal trace: active. Bearing unchanged.
+	(2 large waves of enemies)
+	COMMAND: Corporal Apophis, discontinue pursuit. That's an order.
+	(pause)
+	PLAYER: Command... you called me corporal earlier.
+	(pause)
+	PLAYER: You never call me corporal.
+	(silence)
+	(1 large wave of enemies)
+
+Level 5 - Fracture
+	SYSTEM: Anomaly detected. Incoming transmission: origin mismatch.
+	(pause)
+	SYSTEM: Command frequency: compromised.
+	(1 large wave of enemies)
+	PLAYER: It was never you.
+	(silence)
+	OCTOBIT: Instinct. How primitive.
+	(1 large wave of enemies)
+
+Level 6 - Exposure
+	COMMAND: Apo...ph...is! Do not follow those orders!
+	PLAYER: I know. They had your frequency.
+	COMMAND: How far off course?
+	PLAYER: They didn't move me.
+	(pause)
+	COMMAND: ...Good man.
+	(2 large waves of enemies)
+	SYSTEM: Warning. Massive energy signature detected.
+
+Level 7 - The Phantom
+	SYSTEM: Contact confirmed. Class: unknown.
+	PLAYER: A decoy unit. Of course.
+	(silence)
+	(boss fight)
+
+End of Chapter 4
+	(boss destroyed)
+	SYSTEM: Contact eliminated.
+	COMMAND: Apophis, status.
+	PLAYER: Still on course. Signal trace: intact.
+	(pause)
+	COMMAND: They're trying to lose you. Not stop you.
+	PLAYER: Then Didymos is close.
+	(silence)
+	SYSTEM: Signal trace: strong. Continuing pursuit.
+
+
+CHATPER 5 - ISOLATION
+
+Level 1 - Silence
+	SYSTEM: Entering Oreus core region.
+	(1 small wave of enemies)
+	PLAYER: Command, do you copy?
+	(no response)
+	(1 small wave of enemies)
+	PLAYER: Command.
+	(silence)
+
+Level 2 - Alone
+	(2 medium waves of enemies)
+	SYSTEM: Communication link: unavailable.
+	(pause)
+	PLAYER: Just me then.
+	(2 medium waves of enemies)
+
+Level 3 - Endurance
+	(3 large waves of enemies — heaviest combat so far)
+	SYSTEM: Signal trace: active.
+	(pause)
+	PLAYER: Still on course.
+	(2 large waves of enemies)
+	SYSTEM: Warning. Energy signatures: increasing.
+
+Level 4 - Echo
+	(1 large wave of enemies)
+	SYSTEM: Unclassified signal detected. Frequency: unstable.
+	(pause)
+	SYSTEM: Signal pattern: irregular.
+	(pause)
+	DIDYMOS: ...A...phis... co... you...
+	(silence)
+	PLAYER: ...Didymos?
+	(no response)
+	(1 large wave of enemies)
+
+Level 5 - Ghost
+	SYSTEM: Signal trace: lost.
+	(pause)
+	PLAYER: System, reacquire that frequency.
+	SYSTEM: Unable to reacquire. Source: unknown.
+	(pause)
+	PLAYER: He's alive.
+	(2 large waves of enemies)
+	SYSTEM: Unable to confirm.
+	PLAYER: I know what I heard.
+	(1 large wave of enemies)
+
+Level 6 - Breaking Point
+	(3 large waves of enemies — relentless)
+	SYSTEM: Ship integrity: moderate.
+	(2 large waves of enemies)
+	SYSTEM: Warning. Ship integrity: low.
+	(pause)
+	PLAYER: Not yet.
+	(2 large waves of enemies)
+	SYSTEM: Warning. Massive energy signature detected.
+
+Level 7 - The Warden
+	SYSTEM: Contact confirmed. Class: unknown. Behavior: defensive.
+	PLAYER: They put a guard on him.
+	(silence)
+	(boss fight)
+
+End of Chapter 5
+	(boss destroyed)
+	SYSTEM: Contact eliminated.
+	(pause)
+	SYSTEM: Communication link: restored.
+	COMMAND: Apophis! We lost you for — are you intact?
+	PLAYER: Intact. I picked up a signal out here.
+	COMMAND: Signal? What kind?
+	PLAYER: Didymos. At least... I think it was him.
+	(pause)
+	COMMAND: ...We'll look into it.
+	(pause)
+	SYSTEM: Signal trace: strong. Destination: close.
+	PLAYER: I'm almost there.
+	
+	
+CHAPTER 6 - CONFRONTATION
+
+Level 1 - Arrival
+	SYSTEM: Destination reached. Oreus core.
+	(1 medium wave of enemies)
+	COMMAND: Apophis, we're tracking you. You're right on top of the signal.
+	PLAYER: I see their formation. They're holding a perimeter.
+	COMMAND: Punch through it.
+	(1 medium wave of enemies)
+
+Level 2 - Perimeter
+	(2 large waves of enemies)
+	SYSTEM: Didymos signal: strong. Distance: closing.
+	(2 large waves of enemies)
+	PLAYER: I'm close. I can feel it.
+	COMMAND: Stay focused. Don't rush.
+	(1 large wave of enemies)
+
+Level 3 - Contact
+	SYSTEM: Unclassified signal detected. Frequency: unstable.
+	(pause)
+	DIDYMOS: Apo...phis. Don't... come any further.
+	(pause)
+	PLAYER: Didymos! I'm here. What's your status?
+	DIDYMOS: It's a... they're using me to...
+	(signal cuts)
+	PLAYER: Didymos!
+	(silence)
+	(2 large waves of enemies)
+
+Level 4 - Trap
+	SYSTEM: Warning. Enemy formations: converging.
+	(3 large waves of enemies — relentless)
+	COMMAND: Apophis, pull back! It's a trap!
+	PLAYER: Negative. Didymos is here.
+	(2 large waves of enemies)
+	OCTOBIT: You came a long way.
+	(pause)
+	OCTOBIT: For nothing.
+	(1 large wave of enemies)
+
+Level 5 - Reckoning
+	PLAYER: Where is he?
+	OCTOBIT: Safe. For now he is... useful.
+	(pause)
+	PLAYER: Let him go.
+	OCTOBIT: No.
+	(silence)
+	(2 large waves of enemies)
+	SYSTEM: Warning. Massive energy signature detected.
+	SYSTEM: Source: direct.
+
+Level 6 - OctoBit
+	SYSTEM: Contact confirmed. Designation: OctoBit.
+	COMMAND: Apophis... that's him. That's actually him.
+	PLAYER: I know.
+	(silence)
+	(boss fight)
+
+End of Chapter 6
+	(boss defeated — not destroyed)
+	SYSTEM: Contact: critical damage. Retreating.
+	(pause)
+	OCTOBIT: ...Unexpected.
+	(pause)
+	SYSTEM: Didymos signal: present. Location: unconfirmed.
+	PLAYER: Command, Didymos is still out there.
+	COMMAND: I know. But OctoBit is still alive.
+	(pause)
+	COMMAND: Apophis. Come home.
+	(long pause)
+	PLAYER: ...Not yet.
+	SYSTEM: Signal trace: faint. Continuing pursuit.
+	
+
+CHAPTER 7 - RETURN
+
+Level 1 - Signal
+	SYSTEM: Didymos signal: strong. Distance: closing.
+	(1 small wave of enemies)
+	PLAYER: I'm right on top of it. Didymos, do you copy?
+	(static)
+	PLAYER: Didymos.
+	DIDYMOS: ...I copy.
+	(pause)
+	PLAYER: Hold on.
+	(1 medium wave of enemies)
+
+Level 2 - Found
+	(2 medium waves of enemies)
+	DIDYMOS: Apophis... how long have you been out here?
+	PLAYER: Long enough. What's your status?
+	DIDYMOS: Functional. Barely.
+	(pause)
+	DIDYMOS: You shouldn't have come.
+	PLAYER: I know.
+	(1 large wave of enemies)
+
+Level 3 - Extraction
+	(2 large waves of enemies)
+	DIDYMOS: There are too many of them.
+	PLAYER: Keep your systems online. I'll handle it.
+	(2 large waves of enemies)
+	DIDYMOS: Apophis—
+	PLAYER: I said I'll handle it.
+	(2 large waves of enemies)
+	SYSTEM: Didymos signal: locked.
+
+Level 4 - Out
+	SYSTEM: Extraction path: clear.
+	DIDYMOS: I'm free. I'm actually free.
+	(pause)
+	PLAYER: Don't celebrate yet. We still have to get home.
+	(1 medium wave of enemies)
+	COMMAND: Apophis! You have Didymos?
+	PLAYER: Confirmed. We're heading back.
+	COMMAND: Good. But Apophis...
+	(pause)
+	COMMAND: We have a problem.
+
+Level 5 - Doomsday
+	COMMAND: While you were out there, OctoBit initiated a contingency.
+	PLAYER: What kind of contingency?
+	COMMAND: A swarm. Massive. Already moving toward Earth.
+	(pause)
+	DIDYMOS: How massive?
+	COMMAND: Bigger than anything we've seen.
+	(1 large wave of enemies)
+	PLAYER: Of course he did.
+	COMMAND: Apophis, I need you back here. Both of you.
+	PLAYER: We're on our way.
+	(1 medium wave of enemies)
+	SYSTEM: Jump coordinates set. Destination: Milky Way.
+
+Level 6 - Homebound
+	(2 large waves of enemies)
+	DIDYMOS: Apophis. Thank you.
+	PLAYER: Thank me when this is over.
+	(1 large wave of enemies)
+	COMMAND: Ceres and Hermes are already in position. We're holding for now.
+	PLAYER: We'll be there.
+	(pause)
+	SYSTEM: System jump ready.
+	PLAYER: Engage.
+	(animation of system jump)
+	
+CHAPTER 8 - LAST SAND
+
+Level 1 - Home
+	SYSTEM: Jump complete. Entering Milky Way.
+	(pause)
+	DIDYMOS: Earth...
+	PLAYER: Focus. What are we looking at, command?
+	COMMAND: Swarm is already in outer orbit. Thousands of contacts.
+	(pause)
+	COMMAND: Hold the line. That's all we need.
+	(2 medium waves of enemies)
+
+Level 2 - Swarm
+	SYSTEM: Multiple signatures detected. Count: high.
+	(3 large waves of enemies)
+	DIDYMOS: There's no end to them.
+	PLAYER: There's always an end.
+	(3 large waves of enemies)
+	SYSTEM: Warning. Swarm density: increasing.
+
+Level 3 - Together
+	(3 large waves of enemies)
+	HERMES: Miss me?
+	(Hermes flies through, eliminating a wave)
+	HERMES: Don't answer that.
+	(2 large waves of enemies)
+	CERES: Stay tight. Don't let them through.
+	(Ceres flies through, eliminating a wave)
+	(2 large waves of enemies)
+	DIDYMOS: Apophis, I'm right behind you.
+	(Didymos flies through, eliminating a wave)
+
+Level 4 - Push
+	COMMAND: You're pushing them back. Keep going.
+	(3 large waves of enemies)
+	PLAYER: How's Earth holding?
+	COMMAND: Barely. Don't stop.
+	(3 large waves of enemies)
+	SYSTEM: Warning. Swarm density: critical.
+	(2 large waves of enemies)
+	CERES: Something's wrong. They're not retreating.
+	HERMES: They're making room for something.
+	(pause)
+	SYSTEM: Warning. Massive energy signature detected.
+
+Level 5 - Echo
+	SYSTEM: Contact confirmed. Class: unknown.
+	PLAYER: Command, I'm seeing a signature. It looks like...
+	COMMAND: That's impossible.
+	PLAYER: It's him.
+	COMMAND: OctoBit is defeated. We confirmed it.
+	PLAYER: Then what is that?
+	(pause)
+	SYSTEM: Designation: unresolvable.
+	(silence)
+	(boss fight begins)
+
+Level 6 - The Clone
+	DIDYMOS: Apophis, we're coming in.
+	PLAYER: Negative. Hold back.
+	DIDYMOS: But—
+	PLAYER: I said hold back.
+	(silence)
+	(boss fight)
+
+End of Chapter 8
+	(clone destroyed)
+	SYSTEM: Contact eliminated.
+	(pause)
+	COMMAND: ...It's over.
+	HERMES: Did we just—
+	CERES: Yes. We did.
+	(pause)
+	DIDYMOS: Apophis. It's done.
+	PLAYER: ...Yeah.
+	(long pause)
+	COMMAND: All units, return to base. Well done.
+	(pause)
+	(silence)
+	SYSTEM: Residual signal detected. Origin: unknown.
+	SYSTEM: Frequency match: 99.7%.
+	(pause)
+	SYSTEM: Source: unconfirmed.
+	(signal fades)
+	(game ends)
