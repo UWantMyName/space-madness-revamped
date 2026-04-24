@@ -418,8 +418,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   freqX: 3
   freqY: 4
-  amplitudeX: 1
-  amplitudeY: 1
+  amplitudeX: 0.25
+  amplitudeY: 0.25
   phaseOffset: 3.16
   slotPosition: {x: 0, y: 0}
 --- !u!1660057539 &9223372036854775807
