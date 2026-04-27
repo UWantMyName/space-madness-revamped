@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8615518782671683876}
   - component: {fileID: 2528884660657293506}
   - component: {fileID: 3731557471800750730}
-  - component: {fileID: 8088846750875785968}
+  - component: {fileID: 1720681845727674146}
   m_Layer: 0
   m_Name: Alien
   m_TagString: Alien
@@ -29,8 +29,8 @@ Transform:
   m_GameObject: {fileID: 1662140487908783671}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.41, y: 1.466, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,8 +84,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -9095717837082945937, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
-  m_Color: {r: 1, g: 0.16509432, b: 0.16509432, a: 1}
+  m_Sprite: {fileID: 21300000, guid: b79c475648f53e368879401925eba5aa, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -124,8 +124,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AlienHealth
   deathTrigger: Die
   deathAnimationDuration: 0.6
---- !u!70 &8088846750875785968
-CapsuleCollider2D:
+--- !u!61 &1720681845727674146
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -158,6 +158,15 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
-  m_Direction: 0
+  m_Offset: {x: -0.04, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 2}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0

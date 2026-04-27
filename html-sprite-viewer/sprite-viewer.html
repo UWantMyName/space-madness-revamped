@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sprite Viewer — Space Madness</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #0a0c10;
+    --surface: #111520;
+    --border:  #1e2840;
+    --accent:  #00f5c4;
+    --accent2: #c084fc;
+    --text:    #e2e8f0;
+    --muted:   #4a5568;
+    --danger:  #f97316;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    margin-bottom: 2rem;
+  }
+
+  h1 span { color: var(--accent2); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 1200px;
+  }
+
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 580px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .panel-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  textarea {
+    width: 100%;
+    height: 280px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    padding: 1rem;
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+
+  .hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+    line-height: 1.7;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .hint b { color: var(--accent2); font-weight: 500; }
+
+  .btn-row {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  button {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.55rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0c10;
+    border: none;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover { filter: brightness(1.15); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+  }
+
+  .btn-secondary:hover { background: rgba(192,132,252,0.1); }
+  .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .btn-ghost:hover { background: rgba(0,245,196,0.08); }
+
+  .preview-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    gap: 1.5rem;
+  }
+
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border-radius: 4px;
+    display: block;
+  }
+
+  .checker-bg {
+    background-image:
+      linear-gradient(45deg, #1a1a2e 25%, transparent 25%),
+      linear-gradient(-45deg, #1a1a2e 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #1a1a2e 75%),
+      linear-gradient(-45deg, transparent 75%, #1a1a2e 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    background-color: #141424;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+  }
+
+  .scale-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .scale-row label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .scale-btns { display: flex; gap: 4px; }
+
+  .scale-btn {
+    width: 30px;
+    height: 26px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 0;
+  }
+
+  .scale-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .scale-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,245,196,0.08); }
+
+  .empty-state {
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 2.2;
+  }
+
+  .error-msg {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--danger);
+    margin-top: 0.5rem;
+    min-height: 1.2rem;
+  }
+
+  .size-info {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+
+  .gen-section { display: flex; flex-direction: column; gap: 1rem; }
+
+  .field-row { display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .field-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .presets { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  .preset-btn {
+    height: 27px;
+    padding: 0 9px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.67rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .preset-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .preset-btn.active { border-color: var(--accent2); color: var(--accent2); background: rgba(192,132,252,0.1); }
+
+  .dim-row { display: flex; align-items: center; gap: 0.5rem; }
+
+  .dim-input {
+    width: 62px;
+    height: 32px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    padding: 0 0.5rem;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+
+  .dim-input:focus { border-color: var(--accent); }
+
+  .dim-sep { font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; color: var(--muted); }
+
+  .fill-row { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  .fill-btn {
+    height: 27px;
+    padding: 0 9px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .fill-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .fill-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,245,196,0.08); }
+
+  .divider { border: none; border-top: 1px solid var(--border); }
+
+  .gen-output {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent2);
+    min-height: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>Space Madness // <span>Sprite Viewer</span></h1>
+
+<div class="layout">
+
+  <!-- PANEL 1: Grid Generator -->
+  <div class="panel">
+    <div class="panel-label">Grid generator</div>
+    <div class="gen-section">
+
+      <div class="field-row">
+        <div class="field-label">Presets</div>
+        <div class="presets" id="presetBtns">
+          <button class="preset-btn active" data-w="16" data-h="16">16x16</button>
+          <button class="preset-btn" data-w="32" data-h="32">32x32</button>
+          <button class="preset-btn" data-w="48" data-h="48">48x48</button>
+          <button class="preset-btn" data-w="64" data-h="64">64x64</button>
+          <button class="preset-btn" data-w="32" data-h="16">32x16</button>
+          <button class="preset-btn" data-w="16" data-h="32">16x32</button>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">Custom size</div>
+        <div class="dim-row">
+          <input class="dim-input" type="number" id="dimW" value="16" min="1" max="256" title="Width in pixels"/>
+          <span class="dim-sep">x</span>
+          <input class="dim-input" type="number" id="dimH" value="16" min="1" max="256" title="Height in pixels"/>
+          <span class="field-label" style="margin-left:4px;">px</span>
+        </div>
+      </div>
+
+      <hr class="divider"/>
+
+      <div class="field-row">
+        <div class="field-label">Initial fill</div>
+        <div class="fill-row" id="fillBtns">
+          <button class="fill-btn active" data-fill="null">Transparent</button>
+          <button class="fill-btn" data-fill="#000000">Black</button>
+          <button class="fill-btn" data-fill="#ffffff">White</button>
+        </div>
+      </div>
+
+      <button class="btn-ghost" id="generateBtn">Generate blank grid</button>
+
+      <div class="gen-output" id="genOutput"></div>
+
+      <hr class="divider"/>
+
+      <div class="hint">
+        Pick a size, hit <b>Generate</b> — the blank grid appears in Sprite Data ready to edit or render.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PANEL 2: Paste / Edit Data -->
+  <div class="panel">
+    <div class="panel-label">Sprite data</div>
+    <textarea id="codeInput" spellcheck="false" placeholder="Paste or generate a grid here..."></textarea>
+    <div class="hint">
+      2D array — rows of hex strings or <b>null</b> for transparent.<br>
+      <b>Ctrl+Enter</b> to render quickly.
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="btn-row">
+      <button class="btn-primary" id="renderBtn">Render</button>
+      <button class="btn-secondary" id="exportBtn" disabled>Export PNG</button>
+    </div>
+  </div>
+
+  <!-- PANEL 3: Preview -->
+  <div class="panel">
+    <div class="panel-label">Preview</div>
+    <div class="preview-area" id="previewArea">
+      <div class="empty-state">
+        Generate or paste a grid<br>and hit [ Render ].
+      </div>
+    </div>
+    <div class="btn-row" style="justify-content: space-between; margin-top: 1rem;">
+      <div class="scale-row">
+        <label>Scale</label>
+        <div class="scale-btns" id="scaleBtns">
+          <button class="scale-btn active" data-scale="1">1x</button>
+          <button class="scale-btn" data-scale="2">2x</button>
+          <button class="scale-btn" data-scale="4">4x</button>
+          <button class="scale-btn" data-scale="8">8x</button>
+          <button class="scale-btn" data-scale="16">16x</button>
+        </div>
+      </div>
+      <div class="size-info" id="sizeInfo"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentGrid  = null;
+  let currentScale = 1;
+  let currentFill  = 'null';
+
+  const input     = document.getElementById('codeInput');
+  const renderBtn = document.getElementById('renderBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const preview   = document.getElementById('previewArea');
+  const errorMsg  = document.getElementById('errorMsg');
+  const sizeInfo  = document.getElementById('sizeInfo');
+  const genOutput = document.getElementById('genOutput');
+  const dimW      = document.getElementById('dimW');
+  const dimH      = document.getElementById('dimH');
+
+  // Preset buttons
+  document.getElementById('presetBtns').addEventListener('click', e => {
+    const btn = e.target.closest('.preset-btn');
+    if (!btn) return;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    dimW.value = btn.dataset.w;
+    dimH.value = btn.dataset.h;
+  });
+
+  [dimW, dimH].forEach(inp => inp.addEventListener('input', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  }));
+
+  // Fill buttons
+  document.getElementById('fillBtns').addEventListener('click', e => {
+    const btn = e.target.closest('.fill-btn');
+    if (!btn) return;
+    document.querySelectorAll('.fill-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFill = btn.dataset.fill;
+  });
+
+  // Generate blank grid
+  document.getElementById('generateBtn').addEventListener('click', () => {
+    const w = Math.max(1, Math.min(256, parseInt(dimW.value) || 16));
+    const h = Math.max(1, Math.min(256, parseInt(dimH.value) || 16));
+    dimW.value = w;
+    dimH.value = h;
+
+    const cellValue = currentFill === 'null' ? null : currentFill;
+    const grid = Array.from({ length: h }, () => Array(w).fill(cellValue));
+
+    input.value = JSON.stringify(grid, null, 0);
+    genOutput.textContent = 'Done — ' + w + 'x' + h + ' grid pasted into sprite data.';
+    setTimeout(() => { genOutput.textContent = ''; }, 3000);
+  });
+
+  // Parse + validate
+  function parseGrid(text) {
+    const grid = JSON.parse(text.trim());
+    if (!Array.isArray(grid) || !Array.isArray(grid[0]))
+      throw new Error('Expected a 2D array.');
+    const cols = grid[0].length;
+    for (const row of grid) {
+      if (row.length !== cols)
+        throw new Error('All rows must have the same column count.');
+      for (const cell of row)
+        if (cell !== null && typeof cell !== 'string')
+          throw new Error('Each cell must be a hex string or null.');
+    }
+    return grid;
+  }
+
+  // Draw to canvas
+  function renderToCanvas(grid, scale) {
+    const rows = grid.length, cols = grid[0].length;
+    const c = document.createElement('canvas');
+    c.width = cols * scale;
+    c.height = rows * scale;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    for (let r = 0; r < rows; r++)
+      for (let col = 0; col < cols; col++)
+        if (grid[r][col]) {
+          ctx.fillStyle = grid[r][col];
+          ctx.fillRect(col * scale, r * scale, scale, scale);
+        }
+    return c;
+  }
+
+  function showPreview(grid) {
+    const rows = grid.length, cols = grid[0].length;
+    const displayScale = Math.max(1, Math.floor(260 / Math.max(rows, cols)));
+    const c = renderToCanvas(grid, displayScale);
+    c.style.width  = (cols * displayScale) + 'px';
+    c.style.height = (rows * displayScale) + 'px';
+    preview.innerHTML = '';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'checker-bg';
+    wrapper.appendChild(c);
+    preview.appendChild(wrapper);
+    sizeInfo.textContent = cols + ' x ' + rows + ' px';
+  }
+
+  // Render
+  renderBtn.addEventListener('click', () => {
+    errorMsg.textContent = '';
+    try {
+      currentGrid = parseGrid(input.value);
+      showPreview(currentGrid);
+      exportBtn.disabled = false;
+    } catch(e) {
+      errorMsg.textContent = 'Error: ' + e.message;
+      currentGrid = null;
+      exportBtn.disabled = true;
+    }
+  });
+
+  // Scale
+  document.getElementById('scaleBtns').addEventListener('click', e => {
+    const btn = e.target.closest('.scale-btn');
+    if (!btn) return;
+    document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentScale = parseInt(btn.dataset.scale);
+    if (currentGrid) showPreview(currentGrid);
+  });
+
+  // Export PNG — always exports at minimum 4x so tiny sprites aren't 16x16 files
+  exportBtn.addEventListener('click', () => {
+    if (!currentGrid) return;
+    const exportScale = Math.max(currentScale, 4);
+    const c = renderToCanvas(currentGrid, exportScale);
+    const link = document.createElement('a');
+    link.download = 'sprite_' + currentGrid[0].length + 'x' + currentGrid.length + '.png';
+    link.href = c.toDataURL('image/png');
+    link.click();
+  });
+
+  // Ctrl+Enter shortcut
+  input.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') renderBtn.click();
+  });
+</script>
+</body>
+</html>
