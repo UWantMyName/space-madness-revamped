@@ -70,6 +70,11 @@ public class AlienDefinition : ScriptableObject
     [Tooltip("Shifts the starting phase. Give each alien a different value so they don't all move in sync.")]
     public float lissajousPhaseOffset = 0f;
 
+    [Header("Health")]
+    [Tooltip("How many hits this alien can take before dying.")]
+    [Min(1)]
+    public int maxHP = 3;
+
     [Header("Shooting")]
     [Tooltip("Average time in seconds between shots during Active state.")]
     public float shootInterval = 2f;

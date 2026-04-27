@@ -12,8 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcd31002170d075fab6944608503ba3a, type: 3}
   m_Name: WaveDefinition
   m_EditorClassIdentifier: Assembly-CSharp::WaveDefinition
-  slotDefinition: {fileID: 0}
-  alienDefinitions: []
-  groupSize: 3
+  slotDefinition: {fileID: 11400000, guid: 83a4062b76c402d8eaf80a39543b0bf4, type: 2}
+  alienDefinitions:
+  - {fileID: 11400000, guid: 5823a6ddf6200b1d2a4f83e57bc85814, type: 2}
+  - {fileID: 11400000, guid: 5823a6ddf6200b1d2a4f83e57bc85814, type: 2}
+  - {fileID: 11400000, guid: 5823a6ddf6200b1d2a4f83e57bc85814, type: 2}
+  - {fileID: 11400000, guid: 5823a6ddf6200b1d2a4f83e57bc85814, type: 2}
+  - {fileID: 11400000, guid: 5823a6ddf6200b1d2a4f83e57bc85814, type: 2}
+  - {fileID: 11400000, guid: 5823a6ddf6200b1d2a4f83e57bc85814, type: 2}
+  - {fileID: 11400000, guid: 5823a6ddf6200b1d2a4f83e57bc85814, type: 2}
+  - {fileID: 11400000, guid: 5823a6ddf6200b1d2a4f83e57bc85814, type: 2}
+  groupSize: 4
   delayBeforeFirstGroup: 0.5
   delayBetweenGroups: 1.5

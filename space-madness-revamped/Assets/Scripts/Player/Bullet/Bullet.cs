@@ -6,22 +6,20 @@ public class Bullet : MonoBehaviour
     public float speed = 15f;
     public float lifetime = 2f;
 
-    void Start()
+    private Rigidbody2D _rb;
+
+    private void Awake()
+    {
+        _rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void Start()
     {
         Destroy(gameObject, lifetime);
     }
 
-    void Update()
+    private void Update()
     {
-        transform.Translate(Vector3.up * speed * Time.deltaTime);
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Enemy"))
-        {
-            Destroy(gameObject);
-            // Enemy damage logic will hook in here later
-        }
+        _rb.MovePosition(_rb.position + Vector2.up * speed * Time.deltaTime);
     }
 }
