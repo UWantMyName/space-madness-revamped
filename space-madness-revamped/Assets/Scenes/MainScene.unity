@@ -444,7 +444,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSystem
   dialogueBox: {fileID: 210367570}
   actorNameText: {fileID: 1132298259}
-  actorIcon: {fileID: 269236753}
+  actorIcon: {fileID: 627355043}
   dialogueText: {fileID: 1223647593}
   cursor: {fileID: 1827354334}
   timerBarFill: {fileID: 571810204}
@@ -1363,7 +1363,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 492257945}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -2692,7 +2692,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 1102600723}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -3963,7 +3963,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 1526906657}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
