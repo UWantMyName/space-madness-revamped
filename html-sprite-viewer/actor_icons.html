@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Space Madness — Actor Icons 16x16</title>
+<style>
+  body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;gap:20px;padding:2rem;font-family:monospace;}
+  h1{color:#c084fc;letter-spacing:.2em;font-size:13px;text-transform:uppercase;}
+  .grid{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;max-width:900px;}
+  .card{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .chk{background-image:linear-gradient(45deg,#222240 25%,transparent 25%),linear-gradient(-45deg,#222240 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#222240 75%),linear-gradient(-45deg,transparent 75%,#222240 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;background-color:#111128;border:1px solid #2a2a4a;border-radius:4px;padding:6px;display:inline-block;}
+  canvas{image-rendering:pixelated;display:block;}
+  .name{font-size:10px;color:#c084fc;letter-spacing:.1em;text-transform:uppercase;}
+  .role{font-size:9px;color:#44446a;}
+  .btns{display:flex;gap:5px;}
+  .xb{font-family:monospace;font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer;background:transparent;border:.5px solid #334;color:#778;transition:all .15s;text-transform:uppercase;letter-spacing:.06em;}
+  .xb:hover{color:#c084fc;border-color:#c084fc;}
+  .xb.ok{color:#4ade80;border-color:#4ade80;}
+</style>
+</head>
+<body>
+<h1>Space Madness — Actor Portraits · 16×16</h1>
+<div class="grid" id="grid"></div>
+<script>
+// ── pixel helpers ─────────────────────────────────────────
+function make16(){const c=document.createElement('canvas');c.width=c.height=16;return c;}
+function px(g,x,y,c){if(x<0||x>15||y<0||y>15)return;g.fillStyle=c;g.fillRect(x,y,1,1);}
+function hl(g,y,x1,x2,c){for(let x=x1;x<=x2;x++)px(g,x,y,c);}
+function rect(g,y1,y2,x1,x2,c){for(let y=y1;y<=y2;y++)hl(g,y,x1,x2,c);}
+
+// ── shared face palette ───────────────────────────────────
+const SK ='#d4956a'; // skin
+const SKL='#dea882'; // skin light
+const SKD='#a06040'; // skin shadow
+const OL ='#160606'; // outline
+const EW ='#f0eeec'; // eye white
+const PU ='#1a1028'; // pupil
+const LIP='#b04838'; // lips
+const LID='#7a2820'; // lower lip
+
+// ── FACE BASE ────────────────────────────────────────────
+// Shared skeleton. hairFn(g) adds hair on top.
+// Face: x=3-12, y=2-12. Eyes y=5-6. Mouth y=9.
+function faceBase(g, hairFn, bodyColor, extras) {
+  // Face fill
+  rect(g, 2, 11, 3, 12, SK);
+  // Light forehead
+  rect(g, 2, 4, 4, 11, SKL);
+  // Shadow jaw
+  rect(g, 8, 11, 4, 11, SKD);
+  hl(g, 11, 5, 10, SKD);
+  // Face outline
+  for(let y=2;y<=11;y++){px(g,3,y,OL);px(g,12,y,OL);}
+  hl(g, 2, 3, 12, OL);
+  hl(g, 11, 4, 11, OL);
+  hl(g, 12, 5, 10, SKD); // chin taper
+  // LEFT EYE white + pupil
+  hl(g, 5, 5, 6, EW); hl(g, 6, 5, 6, EW);
+  px(g, 6, 5, PU); px(g, 6, 6, PU);
+  px(g, 5, 5, '#fff'); // eye shine
+  // RIGHT EYE
+  hl(g, 5, 9, 10, EW); hl(g, 6, 9, 10, EW);
+  px(g, 10, 5, PU); px(g, 10, 6, PU);
+  px(g, 9, 5, '#fff');
+  // Nose dot
+  px(g, 8, 8, SKD);
+  // Mouth
+  hl(g, 9, 6, 9, LIP);
+  px(g, 6, 9, SKD); px(g, 9, 9, SKD);
+  hl(g, 10, 6, 9, LID);
+  // Neck
+  hl(g, 12, 6, 9, SK); hl(g, 13, 7, 8, SK);
+  // Body
+  const BC = bodyColor||'#2a2a3e';
+  rect(g, 14, 15, 3, 12, BC);
+  hl(g, 14, 4, 11, '#3a3a4e');
+  // Extras
+  if(extras) extras(g);
+  // Hair on top last
+  if(hairFn) hairFn(g);
+}
+
+// ── APOPHIS ───────────────────────────────────────────────
+// Short dark hair, clean, determined brow, slight chin shadow
+function drawApophis(g){
+  faceBase(g,
+    (g)=>{
+      const H='#180a00', HL='#2e1500';
+      rect(g, 0, 3, 3, 12, H);
+      hl(g, 0, 5, 10, H); hl(g, 1, 4, 11, H); hl(g, 2, 3, 12, H);
+      hl(g, 1, 6, 9, HL); // highlight
+      // Brow
+      hl(g, 4, 5, 6, H); hl(g, 4, 9, 10, H);
+    },
+    '#2a2a3e',
+    (g)=>{
+      // Stubble on chin
+      px(g,6,10,SKD); px(g,8,10,SKD); px(g,10,10,SKD);
+      px(g,7,11,SKD); px(g,9,11,SKD);
+    }
+  );
+}
+
+// ── DIDYMOS ───────────────────────────────────────────────
+// Brown hair, round glasses frames, friendly
+function drawDidymos(g){
+  faceBase(g,
+    (g)=>{
+      const H='#5a2e08', HL='#7e4818';
+      rect(g, 0, 3, 3, 12, H);
+      hl(g, 0, 5, 10, H); hl(g, 1, 4, 11, H); hl(g, 2, 3, 12, H);
+      hl(g, 1, 6, 10, HL);
+      // Slight wave in hair
+      px(g, 0, 5, HL); px(g, 0, 8, HL);
+    },
+    '#1e2e2a',
+    (g)=>{
+      // Glasses: thin rectangular frames
+      const GC='#4a3010';
+      // Left lens outline: y=4-7, x=4-7
+      hl(g, 4, 4, 7, GC); hl(g, 7, 4, 7, GC);
+      px(g, 4, 5, GC); px(g, 4, 6, GC);
+      px(g, 7, 5, GC); px(g, 7, 6, GC);
+      // Right lens outline: y=4-7, x=8-11
+      hl(g, 4, 8, 11, GC); hl(g, 7, 8, 11, GC);
+      px(g, 8, 5, GC); px(g, 8, 6, GC);
+      px(g, 11, 5, GC); px(g, 11, 6, GC);
+      // Bridge between lenses
+      px(g, 7, 5, GC); px(g, 8, 5, GC);
+    }
+  );
+}
+
+// ── CERES ─────────────────────────────────────────────────
+// Red/auburn longer hair with a side bun, confident
+function drawCeres(g){
+  const skC='#dba878', skLC='#ecc090', skDC='#aa6848';
+  // Slightly lighter skin
+  rect(g, 2, 11, 3, 12, skC);
+  rect(g, 2, 4, 4, 11, skLC);
+  rect(g, 8, 11, 4, 11, skDC);
+  hl(g, 11, 5, 10, skDC);
+  for(let y=2;y<=11;y++){px(g,3,y,OL);px(g,12,y,OL);}
+  hl(g, 2, 3, 12, OL); hl(g, 11, 4, 11, OL);
+  hl(g, 12, 5, 10, skDC);
+  // Eyes
+  hl(g,5,5,6,EW); hl(g,6,5,6,EW); px(g,6,5,PU); px(g,6,6,PU); px(g,5,5,'#fff');
+  hl(g,5,9,10,EW); hl(g,6,9,10,EW); px(g,10,5,PU); px(g,10,6,PU); px(g,9,5,'#fff');
+  // Eyelashes
+  px(g,4,5,OL); px(g,7,5,OL); px(g,8,5,OL); px(g,11,5,OL);
+  px(g,8,8,skDC); // nose
+  hl(g,9,6,9,LIP); px(g,6,9,skDC); px(g,9,9,skDC);
+  hl(g,10,6,9,LID);
+  hl(g,12,6,9,skC); hl(g,13,7,8,skC);
+  rect(g,14,15,3,12,'#2e1a2a');
+  hl(g,14,4,11,'#40283c');
+  // Red hair — full top + sides + bun
+  const H='#8b1a00', HL='#c03010';
+  rect(g, 0, 3, 3, 12, H);
+  hl(g, 0, 5, 10, H); hl(g, 1, 4, 11, H); hl(g, 2, 3, 12, H);
+  hl(g, 1, 6, 9, HL);
+  // Side strands (longer hair on sides)
+  rect(g, 4, 9, 2, 3, H); // left strand
+  rect(g, 4, 9, 12, 13, H); // right strand
+  // Bun on top-right
+  rect(g, 0, 2, 12, 14, H);
+  px(g, 12, 1, HL); px(g, 13, 1, HL);
+}
+
+// ── HERMES ────────────────────────────────────────────────
+// Near-black hair, short beard, raised brow, cocky
+function drawHermes(g){
+  faceBase(g,
+    (g)=>{
+      const H='#100800', HL='#221400';
+      rect(g, 0, 3, 3, 12, H);
+      hl(g, 0, 5, 10, H); hl(g, 1, 4, 11, H); hl(g, 2, 3, 12, H);
+      px(g, 1, 6, HL); px(g, 1, 9, HL);
+      // Asymmetric brows — right raised
+      hl(g, 4, 5, 6, H); // left brow low
+      hl(g, 3, 9, 11, H); // right brow high (raised)
+    },
+    '#222028',
+    (g)=>{
+      // Short beard — dark dots on lower face
+      const BD='#221008';
+      hl(g, 10, 5, 10, BD);
+      hl(g, 11, 5, 10, BD);
+      px(g, 5, 9, BD); px(g, 10, 9, BD);
+      // Smirk — asymmetric mouth (override base mouth slightly)
+      px(g, 9, 9, LIP); px(g, 10, 10, LIP);
+    }
+  );
+}
+
+// ── PETA — augmented human, Apophis' dark counterpart ─────
+// Half-face normal, half cybernetic. Implanted red eye on left.
+function drawPeta(g){
+  // Custom face — darker skin tone
+  const PS='#a07050', PSL='#b88860', PSD='#705030';
+  rect(g, 2, 11, 3, 12, PS);
+  rect(g, 2, 4, 4, 11, PSL);
+  rect(g, 8, 11, 4, 11, PSD);
+  hl(g, 11, 5, 10, PSD);
+  for(let y=2;y<=11;y++){px(g,3,y,OL);px(g,12,y,OL);}
+  hl(g,2,3,12,OL); hl(g,11,4,11,OL);
+  hl(g,12,5,10,PSD);
+
+  // LEFT EYE — normal human
+  hl(g,5,5,6,EW); hl(g,6,5,6,EW);
+  px(g,6,5,PU); px(g,6,6,PU); px(g,5,5,'#fff');
+
+  // RIGHT EYE — cybernetic red implant
+  hl(g,5,9,10,'#330008'); hl(g,6,9,10,'#330008');
+  px(g,9,5,'#ff0020'); px(g,10,5,'#ff0020');
+  px(g,9,6,'#cc0018'); px(g,10,6,'#cc0018');
+  px(g,9,4,'#ff4444'); // scan line above
+
+  // Metal implant line on right cheek
+  const MT='#4a5a6a', MTL='#6a8a9a';
+  hl(g,7,9,12,MT); px(g,7,9,MTL); px(g,7,12,MTL);
+  hl(g,8,10,12,MT);
+
+  // Nose
+  px(g,8,8,PSD);
+
+  // Mouth — grim/closed
+  hl(g,9,6,9,'#8a2828');
+
+  // Neck
+  hl(g,12,6,9,PS); hl(g,13,7,8,PS);
+
+  // Dark hair with metal streak
+  const H='#100808';
+  rect(g,0,3,3,12,H);
+  hl(g,0,5,10,H); hl(g,1,4,11,H); hl(g,2,3,12,H);
+  // Metal streak in hair
+  hl(g,1,9,11,MTL); hl(g,2,10,12,MTL);
+
+  // Body — dark armour
+  rect(g,14,15,3,12,'#0a1418');
+  hl(g,14,4,11,'#1a2428');
+  // Armour shoulder line
+  hl(g,13,4,11,MT);
+}
+
+// ── SYSTEM — old-school CRT computer ─────────────────────
+function drawSystem(g){
+  const MB='#a0a080'; // monitor beige
+  const MD='#888870'; // monitor dark
+  const SC='#0a0a30'; // screen dark
+  const SL='#1a2060'; // screen lit
+  const SG='#3a8a40'; // screen green text glow
+  const OL='#303018';
+  const KB='#b0b090'; // keyboard
+
+  // Monitor body
+  rect(g,1,10,1,14,MB);
+  // Monitor outline
+  for(let y=1;y<=10;y++){px(g,1,y,OL);px(g,14,y,OL);}
+  hl(g,1,1,14,OL); hl(g,10,1,14,OL);
+  // Screen bezel (inner dark frame)
+  rect(g,2,9,2,13,MD);
+  // Screen surface
+  rect(g,3,8,3,12,SC);
+  // Screen lit area
+  rect(g,3,8,4,11,SL);
+  // Green scan lines on screen
+  hl(g,4,4,11,SG); hl(g,6,4,11,SG); hl(g,8,4,8,SG);
+  // Monitor feet/stand
+  rect(g,10,11,6,9,MD); hl(g,10,6,9,OL);
+  // Base
+  rect(g,11,12,3,12,MB);
+  hl(g,11,3,12,MD); hl(g,12,3,12,OL); hl(g,11,3,3,OL); hl(g,11,12,12,OL);
+  // Keyboard (small)
+  rect(g,13,14,2,13,KB);
+  hl(g,13,2,13,OL); hl(g,14,2,13,OL);
+  for(let x=3;x<=12;x+=2) px(g,x,13,MD); // key hints
+  // Power light on monitor
+  px(g,9,12,'#00ff44');
+}
+
+// ── COMMANDER SP8S — gold star insignia ───────────────────
+function drawCommander(g){
+  // Draw a 5-pointed star using polygon path, then render
+  const c=g.canvas; // we'll draw path directly on the context
+  const GD='#cc8a00', GL='#ffcc22', GS='#886600', BD='#1a1428';
+
+  // Background
+  rect(g,0,15,0,15,BD);
+  // Dark blue badge circle
+  g.fillStyle='#0a1848';
+  g.beginPath(); g.arc(8,8,7,0,Math.PI*2); g.fill();
+  // Gold ring
+  g.strokeStyle=GD; g.lineWidth=1;
+  g.beginPath(); g.arc(8,8,6.5,0,Math.PI*2); g.stroke();
+
+  // 5-pointed star at center
+  g.fillStyle=GL;
+  g.beginPath();
+  const OR=5, IR=2.1;
+  for(let i=0;i<10;i++){
+    const a=Math.PI*i/5 - Math.PI/2;
+    const r=i%2===0?OR:IR;
+    const x=8+r*Math.cos(a), y=8+r*Math.sin(a);
+    i===0?g.moveTo(x,y):g.lineTo(x,y);
+  }
+  g.closePath(); g.fill();
+  // Star shadow
+  g.fillStyle=GD;
+  g.beginPath();
+  for(let i=0;i<10;i++){
+    const a=Math.PI*i/5 - Math.PI/2;
+    const r=i%2===0?OR:IR;
+    const x=8+r*Math.cos(a)+0.5, y=8+r*Math.sin(a)+0.5;
+    i===0?g.moveTo(x,y):g.lineTo(x,y);
+  }
+  g.closePath(); g.fill();
+  // Re-draw star on top brighter
+  g.fillStyle=GL;
+  g.beginPath();
+  for(let i=0;i<10;i++){
+    const a=Math.PI*i/5 - Math.PI/2;
+    const r=i%2===0?OR:IR;
+    const x=8+r*Math.cos(a), y=8+r*Math.sin(a);
+    i===0?g.moveTo(x,y):g.lineTo(x,y);
+  }
+  g.closePath(); g.fill();
+  // Bright top highlight on star
+  g.fillStyle='#ffee66';
+  g.beginPath();
+  for(let i=0;i<10;i++){
+    const a=Math.PI*i/5 - Math.PI/2;
+    const r=i%2===0?(OR-0.5):IR;
+    const x=8+r*Math.cos(a), y=8+r*Math.sin(a)-0.5;
+    i===0?g.moveTo(x,y):g.lineTo(x,y);
+  }
+  g.closePath(); g.fill();
+}
+
+// ── OCTOBIT — simplified evil Atari alien ─────────────────
+function drawOctobit(g){
+  const PD='#1a0028', PM='#440066', PL='#8800bb', PB='#cc22ee';
+  const GR='#00ee44', GD='#006618', RE='#ff1100';
+  const WH='#f0f0f0', BK='#060008';
+  const YL='#ffcc00';
+
+  // Body block
+  rect(g,4,14,2,13,PM);
+  rect(g,5,13,3,12,PL);
+  // Body face
+  rect(g,6,12,4,11,PM);
+  // Outline
+  for(let y=4;y<=14;y++){px(g,2,y,BK);px(g,13,y,BK);}
+  hl(g,4,2,13,BK);
+
+  // Crown — 3 spikes
+  rect(g,1,3,4,5,PL); hl(g,0,4,5,PB); // left spike
+  rect(g,0,3,7,8,PL); hl(g,0,7,8,PB); // center spike (taller)
+  px(g,7,0,WH); px(g,8,0,WH); // tip glow
+  rect(g,1,3,10,11,PL); hl(g,0,10,11,PB); // right spike
+
+  // Brow plates
+  hl(g,5,4,11,PB);
+  hl(g,5,4,6,PB); hl(g,5,9,11,PB);
+
+  // Eyes — glowing green with red pupils
+  rect(g,6,8,4,6,GD); rect(g,6,8,9,11,GD);
+  hl(g,6,4,6,GR); hl(g,7,4,6,GR);
+  hl(g,6,9,11,GR); hl(g,7,9,11,GR);
+  px(g,5,6,RE); px(g,10,6,RE); // red pupils
+  px(g,4,6,'#88ffaa'); px(g,9,6,'#88ffaa'); // eye shine
+
+  // Energy glyph — yellow (simplified)
+  px(g,7,9,YL); px(g,8,9,YL);
+  px(g,7,10,YL); px(g,8,10,YL);
+
+  // Mouth — jagged 2-tooth grin
+  hl(g,11,4,11,BK);
+  hl(g,12,4,11,PD);
+  px(g,5,11,WH); px(g,6,11,WH); // left tooth
+  px(g,9,11,WH); px(g,10,11,WH); // right tooth
+  px(g,7,12,PD); px(g,8,12,PD); // mouth floor
+
+  // Side mandibles
+  px(g,2,8,PL); px(g,1,9,PB);
+  px(g,13,8,PL); px(g,14,9,PB);
+
+  // Bottom bumps (simplified tentacles)
+  px(g,4,14,PL); px(g,7,14,PL); px(g,8,14,PL); px(g,11,14,PL);
+  px(g,4,15,PM); px(g,7,15,PM); px(g,8,15,PM); px(g,11,15,PM);
+}
+
+// ── RENDER ALL ────────────────────────────────────────────
+const ACTORS=[
+  {id:'system',    name:'SYSTEM',     role:"Ship's HUD",          draw:drawSystem},
+  {id:'commander', name:'CMD. SP8S',  role:'Commander',           draw:drawCommander},
+  {id:'apophis',   name:'APOPHIS',    role:'Player',              draw:drawApophis},
+  {id:'didymos',   name:'DIDYMOS',    role:'Wingman',             draw:drawDidymos},
+  {id:'ceres',     name:'CERES',      role:'Wingman',             draw:drawCeres},
+  {id:'hermes',    name:'HERMES',     role:'Wingman',             draw:drawHermes},
+  {id:'peta',      name:'PETA',       role:"OctoBit's Servant",   draw:drawPeta},
+  {id:'octobit',   name:'OCTOBIT',    role:'Supreme Antagonist',  draw:drawOctobit},
+];
+
+const grid=document.getElementById('grid');
+ACTORS.forEach(({id,name,role,draw})=>{
+  const src=make16();
+  const g=src.getContext('2d');
+  draw(g);
+
+  const disp=document.createElement('canvas');
+  disp.width=disp.height=144;
+  disp.style.cssText='display:block;image-rendering:pixelated;image-rendering:crisp-edges;width:144px;height:144px;';
+  const dc=disp.getContext('2d');
+  dc.imageSmoothingEnabled=false;
+  dc.drawImage(src,0,0,16,16,0,0,144,144);
+
+  const card=document.createElement('div'); card.className='card';
+  const chk=document.createElement('div'); chk.className='chk'; chk.appendChild(disp);
+  const nm=document.createElement('div'); nm.className='name'; nm.textContent=name;
+  const rl=document.createElement('div'); rl.className='role'; rl.textContent=role;
+
+  const copy=document.createElement('button'); copy.className='xb'; copy.textContent='Copy JSON';
+  copy.addEventListener('click',()=>{
+    const d=g.getImageData(0,0,16,16).data, out=[];
+    for(let y=0;y<16;y++){
+      const row=[];
+      for(let x=0;x<16;x++){
+        const i=(y*16+x)*4;
+        if(d[i+3]<10){row.push(null);continue;}
+        row.push('#'+[d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join(''));
+      }
+      out.push(row);
+    }
+    navigator.clipboard.writeText(JSON.stringify(out)).then(()=>{
+      copy.textContent='Copied!'; copy.classList.add('ok');
+      setTimeout(()=>{copy.textContent='Copy JSON'; copy.classList.remove('ok');},2000);
+    });
+  });
+
+  const exp=document.createElement('button'); exp.className='xb'; exp.textContent='PNG';
+  exp.addEventListener('click',()=>{
+    const a=document.createElement('a');
+    a.download=`icon_${id}_16x16.png`;
+    a.href=src.toDataURL('image/png'); a.click();
+  });
+
+  const btns=document.createElement('div'); btns.className='btns';
+  btns.appendChild(copy); btns.appendChild(exp);
+  card.appendChild(chk); card.appendChild(nm); card.appendChild(rl); card.appendChild(btns);
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

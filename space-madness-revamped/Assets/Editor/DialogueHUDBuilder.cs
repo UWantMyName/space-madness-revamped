@@ -108,7 +108,7 @@ public static class DialogueHUDBuilder
         rt.anchorMin = new Vector2(0, 1);
         rt.anchorMax = new Vector2(1, 1);
         rt.pivot     = new Vector2(0.5f, 1f);
-        rt.offsetMin = new Vector2(0, -100);
+        rt.offsetMin = new Vector2(0, -160);
         rt.offsetMax = Vector2.zero;
 
         AddImage(box, C_BG_DEEP);
@@ -150,9 +150,9 @@ public static class DialogueHUDBuilder
         nrt.anchorMin        = new Vector2(0, 1);
         nrt.anchorMax        = new Vector2(0, 1);
         nrt.pivot            = new Vector2(0, 1);
-        nrt.sizeDelta        = new Vector2(400, 22);
+        nrt.sizeDelta        = new Vector2(400, 40);
         nrt.anchoredPosition = new Vector2(96, -10);
-        var nameTMP          = AddTMP(nameGO, "COMMANDER ZRIX", 13, C_ACCENT, FontStyles.Bold);
+        var nameTMP          = AddTMP(nameGO, "COMMANDER ZRIX", 32, C_ACCENT, FontStyles.Bold);
         nameTMP.characterSpacing = 4f;
 
         // Dialogue Text
@@ -161,9 +161,9 @@ public static class DialogueHUDBuilder
         trt.anchorMin = new Vector2(0, 1);
         trt.anchorMax = new Vector2(1, 1);
         trt.pivot     = new Vector2(0, 1);
-        trt.offsetMin = new Vector2(96, -84);
-        trt.offsetMax = new Vector2(-160, -32);
-        var textTMP   = AddTMP(textGO, "", 12, C_TEXT_BODY, FontStyles.Normal);
+        trt.offsetMin = new Vector2(96, -148);
+        trt.offsetMax = new Vector2(-220, -48);
+        var textTMP   = AddTMP(textGO, "", 30, C_TEXT_BODY, FontStyles.Normal);
         textTMP.enableWordWrapping    = true;
         textTMP.lineSpacing           = 6f;
         textTMP.overflowMode          = TextOverflowModes.Overflow;
@@ -203,9 +203,9 @@ public static class DialogueHUDBuilder
         cprt.anchorMin        = new Vector2(1, 0);
         cprt.anchorMax        = new Vector2(1, 0);
         cprt.pivot            = new Vector2(1, 0);
-        cprt.sizeDelta        = new Vector2(120, 18);
+        cprt.sizeDelta        = new Vector2(200, 30);
         cprt.anchoredPosition = new Vector2(-16, 8);
-        var cpTMP             = AddTMP(continueGO, "CONTINUE ▼", 10, C_ACCENT, FontStyles.Normal);
+        var cpTMP             = AddTMP(continueGO, "CONTINUE ▼", 25, C_ACCENT, FontStyles.Normal);
         cpTMP.alignment       = TextAlignmentOptions.Right;
         cpTMP.characterSpacing = 3f;
         var cpColor           = cpTMP.color;
