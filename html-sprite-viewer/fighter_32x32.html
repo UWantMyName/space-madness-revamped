@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Fighter 32x32 v4</title>
+<style>
+  body{background:#888;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;font-family:monospace;}
+  .chk{background-image:linear-gradient(45deg,#999 25%,transparent 25%),linear-gradient(-45deg,#999 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#999 75%),linear-gradient(-45deg,transparent 75%,#999 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;background-color:#bbb;padding:10px;border-radius:6px;}
+  canvas{image-rendering:pixelated;display:block;}
+  .br{display:flex;gap:10px;margin-top:4px;}
+  button{font-family:monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:4px;cursor:pointer;background:#222;color:#aaa;border:1px solid #444;}
+  button:hover{color:#fff;border-color:#aaa;}
+  .lbl{font-family:monospace;font-size:12px;color:#222;letter-spacing:.15em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="lbl">Space Fighter · 32×32 · v4</div>
+<div class="chk"><canvas id="disp" width="320" height="320" style="width:320px;height:320px;"></canvas></div>
+<div class="br">
+  <button id="copyBtn">Copy JSON</button>
+  <button id="expBtn">Export PNG</button>
+</div>
+<script>
+const src=document.createElement('canvas');
+src.width=src.height=32;
+const g=src.getContext('2d');
+
+const BK='#0e0e18';
+const D3='#12121e';
+const D2='#1c1c2c';
+const D1='#2a2a3e';
+const M ='#3e3e54';
+const L1='#585870';
+const L2='#72728a';
+const WH='#9898b0';
+const CF='#cce8f4';
+const CW='#80b8d0';
+const CL='#4888aa';
+const CK='#286078';
+const CD='#183848';
+// Accent colours for mechanical body detail
+const AC='#4a3a5a'; // purple-tinted panel (reactor)
+const AH='#6a5a7a'; // highlight of reactor panel
+const VT='#0e0e1a'; // vent / recess (very dark)
+
+const RD='#882222';
+const RB='#bb3333';
+
+function px(x,y,c){if(x<0||x>31||y<0||y>31)return;g.fillStyle=c;g.fillRect(x,y,1,1);}
+function hl(y,x1,x2,c){for(let x=x1;x<=x2;x++)px(x,y,c);}
+function rect(y1,y2,x1,x2,c){for(let y=y1;y<=y2;y++)hl(y,x1,x2,c);}
+
+g.clearRect(0,0,32,32);
+
+// ══════════════════════════════════════
+//  NOSE — tapers sharply to a 2px tip
+// ══════════════════════════════════════
+px(15,2,WH); px(16,2,WH);   // 2px tip
+hl(3, 14,17, L2);             // 4px
+hl(4, 13,18, L1);             // 6px
+hl(5, 13,18, L1);
+
+// ══════════════════════════════════════
+//  CANOPY  y=6–12
+//  Hull shell (x=13,18) frames the glass
+//  so the nose tip is visible above it
+// ══════════════════════════════════════
+for(let y=6;y<=12;y++){px(13,y,L1);px(18,y,L1);}
+hl(6,  14,17, CF);
+px(14,7,D1);  hl(7, 15,16, CF); px(17,7,D1);
+px(14,8,D1);  hl(8, 15,16, CW); px(17,8,D1);
+px(14,9,D1);  hl(9, 15,16, CL); px(17,9,D1);
+px(14,10,D1); hl(10,15,16, CK); px(17,10,D1);
+px(14,11,D1); hl(11,14,17, CK); px(17,11,D1);
+hl(12, 14,17, CD);
+
+// ══════════════════════════════════════
+//  UPPER BODY  y=13–15
+//  Clean armoured section below canopy
+// ══════════════════════════════════════
+rect(13,15, 13,18, M);
+rect(13,15, 14,17, L1);
+hl(13, 15,16, L2);  // spine highlight fades out here
+hl(14, 15,16, L1);
+
+// Red accent band — cockpit-to-body transition
+hl(13, 13,13, RB); hl(13, 18,18, RB);
+hl(14, 13,13, RD); hl(14, 18,18, RD);
+hl(15, 13,13, RD); hl(15, 18,18, RD);
+
+// ══════════════════════════════════════
+//  REACTOR ZONE  y=16–20
+//  Body widens to 8px — power source
+//  Distinct purple-tint panels suggest
+//  an exposed energy system
+// ══════════════════════════════════════
+rect(16,20, 12,19, D1);     // wider base (8px)
+rect(16,20, 13,18, AC);     // purple-tint reactor panels
+rect(16,20, 14,17, AH);     // reactor face (lighter)
+hl(16, 12,19, L1);          // top seam — component boundary
+// Side vent slits (suggest cooling intake)
+for(const y of [17,19]){
+  px(12,y,VT); px(19,y,VT);
+  px(13,y,D3); px(18,y,D3);
+}
+// Reactor core glow stripe down centre
+for(let y=16;y<=20;y++){px(15,y,L2);px(16,y,L2);}
+// Bottom seam of reactor
+hl(20, 12,19, D3);
+
+// ══════════════════════════════════════
+//  COUPLING SECTION  y=21–22
+//  Narrow junction between reactor
+//  and drive system — panel seams visible
+// ══════════════════════════════════════
+rect(21,22, 13,18, D2);
+hl(21, 14,17, M);            // bright separation band
+hl(22, 13,18, D3);           // dark recessed gap
+
+// ══════════════════════════════════════
+//  COOLING FINS  y=23–25
+//  Alternating stripes suggest
+//  radiator / heat exchanger fins
+// ══════════════════════════════════════
+rect(23,25, 13,18, D1);
+hl(23, 13,18, M);            // fin 1 highlight
+hl(24, 13,18, D2);           // fin 1 shadow / gap
+hl(25, 13,18, M);            // fin 2 highlight
+// Side protrusions — cooling fin tips stick out 1px
+for(const y of [23,25]){
+  px(12,y,D1); px(19,y,D1);
+}
+
+// ══════════════════════════════════════
+//  ENGINE HOUSING  y=26–30
+//  Dark, heavy — twin nozzle bays
+//  No exhaust glow (particle system)
+// ══════════════════════════════════════
+rect(26,30, 13,18, D2);
+rect(26,30, 14,17, D1);
+// Nozzle separation ridge
+hl(26, 13,18, D1);
+px(15,26,M); px(16,26,M);    // centre ridge highlight
+// Twin nozzle recesses — open at bottom, no BK border
+rect(27,30, 13,14, D3);
+rect(27,30, 17,18, D3);
+// Nozzle inner rim
+hl(27, 13,14, D2); hl(27, 17,18, D2);
+
+// ══════════════════════════════════════
+//  FRONT WINGS (smaller pair)
+//  Shifted 3 rows down vs previous:
+//  y=16–22, narrow at top, wide at base
+// ══════════════════════════════════════
+const FRONT={
+  16:11,  // 1px
+  17:10,  // 2px
+  18:9,   // 3px
+  19:8,   // 4px
+  20:6,   // 6px
+  21:5,   // 7px
+  22:4    // 8px — widest
+};
+
+// ══════════════════════════════════════
+//  REAR WINGS (bigger pair)
+//  y=24–30, narrow at top, wide at base
+// ══════════════════════════════════════
+const REAR={
+  24:11,  // 1px
+  25:10,  // 2px
+  26:8,   // 4px
+  27:7,   // 5px
+  28:5,   // 7px
+  29:3,   // 9px
+  30:2    // 10px — noticeably bigger
+};
+
+function drawWingRow(y, lx){
+  if(lx>=13) return;
+  hl(y, lx, 12, M);
+  px(lx,y,L1);
+  if(lx+1<=12) px(lx+1,y,L2);
+  const rx=31-lx;
+  hl(y, 19, rx, M);
+  px(rx,y,L1);
+  if(rx-1>=19) px(rx-1,y,L2);
+}
+
+for(const[ys,lx] of Object.entries(FRONT)) drawWingRow(+ys,lx);
+for(const[ys,lx] of Object.entries(REAR))  drawWingRow(+ys,lx);
+
+// Wing panel seams
+for(const y of [18,21]){
+  const lx=FRONT[y]; if(!lx||lx>=13) continue;
+  hl(y,lx+1,12,D1); hl(y,19,30-lx,D1);
+}
+for(const y of [26,29]){
+  const lx=REAR[y]; if(!lx||lx>=13) continue;
+  hl(y,lx+1,12,D1); hl(y,19,30-lx,D1);
+}
+
+// ══════════════════════════════════════
+//  OUTLINE
+// ══════════════════════════════════════
+px(15,1,BK); px(16,1,BK);
+for(let y=2;y<=5;y++){const lx=[15,14,13,13][y-2];px(lx-1,y,BK);px(32-lx,y,BK);}
+for(let y=6;y<=30;y++){px(12,y,BK);px(19,y,BK);}
+hl(5,12,19,BK);
+// Wing perimeters
+for(const[ys,lx] of Object.entries({...FRONT,...REAR})){
+  const y=+ys; if(lx>=13) continue;
+  px(lx-1,y,BK); px(32-lx,y,BK);
+}
+
+// ── RENDER ────────────────────────────
+const dc=document.getElementById('disp').getContext('2d');
+dc.imageSmoothingEnabled=false;
+dc.drawImage(src,0,0,32,32,0,0,320,320);
+
+function toGrid(){
+  const d=g.getImageData(0,0,32,32).data,out=[];
+  for(let y=0;y<32;y++){
+    const row=[];
+    for(let x=0;x<32;x++){
+      const i=(y*32+x)*4;
+      if(d[i+3]<10){row.push(null);continue;}
+      row.push('#'+[d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join(''));
+    }
+    out.push(row);
+  }
+  return out;
+}
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  const b=document.getElementById('copyBtn');
+  navigator.clipboard.writeText(JSON.stringify(toGrid())).then(()=>{
+    b.textContent='Copied!';
+    setTimeout(()=>{b.textContent='Copy JSON';},2200);
+  });
+});
+document.getElementById('expBtn').addEventListener('click',()=>{
+  const a=document.createElement('a');
+  a.download='fighter_32x32_v4.png';
+  a.href=src.toDataURL('image/png');
+  a.click();
+});
+</script>
+</body>
+</html>
