@@ -1,0 +1,216 @@
+
+<style>
+  .aw{display:flex;flex-direction:column;align-items:center;gap:12px;padding:1rem 0;}
+  .chk{background-image:linear-gradient(45deg,#1a1a2e 25%,transparent 25%),linear-gradient(-45deg,#1a1a2e 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1a2e 75%),linear-gradient(-45deg,transparent 75%,#1a1a2e 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;background-color:#111128;border:1px solid #2a2a4a;border-radius:6px;padding:10px;display:inline-block;}
+  .br{display:flex;gap:8px;}
+  .xb{font-family:monospace;font-size:10px;padding:4px 12px;border-radius:3px;cursor:pointer;background:transparent;border:.5px solid #334;color:#778;transition:all .15s;text-transform:uppercase;letter-spacing:.08em;}
+  .xb:hover{color:var(--color-text-primary);border-color:var(--color-border-primary);}
+  .xb.ok{color:#4ade80;border-color:#4ade80;}
+  .lbl{font-family:monospace;font-size:10px;color:var(--color-text-secondary);letter-spacing:.12em;text-transform:uppercase;}
+</style>
+<div class="aw">
+  <div class="lbl">Asteroid · 32×32</div>
+  <div class="chk">
+    <canvas id="disp" width="288" height="288"
+      style="display:block;image-rendering:pixelated;image-rendering:crisp-edges;width:288px;height:288px;"></canvas>
+  </div>
+  <div class="br">
+    <button class="xb" id="copyBtn">Copy JSON</button>
+    <button class="xb" id="expBtn">Export PNG</button>
+  </div>
+</div>
+<script>
+const src=document.createElement('canvas');
+src.width=src.height=32;
+const g=src.getContext('2d');
+
+// ── palette ──────────────────────────────────────────────
+const _ = null;       // transparent
+const K = '#0e0a08';  // outline / darkest crack
+const D3= '#2a1a0e';  // very dark rock
+const D2= '#3d2610';  // dark rock
+const D1= '#4e3018';  // dark-mid rock
+const M = '#614020';  // mid rock
+const L1= '#7a5228';  // light rock
+const L2= '#906030';  // lighter rock
+const H = '#a87040';  // highlight face
+const HL= '#c08848';  // bright highlight
+const C = '#1a100a';  // crater pit (deepest)
+const CR= '#2e1c0e';  // crater rim inner
+
+function px(x,y,c){if(x<0||x>31||y<0||y>31)return;g.fillStyle=c;g.fillRect(x,y,1,1);}
+function hl(y,x1,x2,c){for(let x=x1;x<=x2;x++)px(x,y,c);}
+function rect(y1,y2,x1,x2,c){for(let y=y1;y<=y2;y++)hl(y,x1,x2,c);}
+
+g.clearRect(0,0,32,32);
+
+// ══════════════════════════════════════
+//  IRREGULAR SILHOUETTE
+//  Deliberately non-circular — lumpy,
+//  wider left, tapers uneven right,
+//  protruding top-left lobe
+// ══════════════════════════════════════
+
+const ROWS = [
+//  y   x1  x2
+  [ 2,  10, 17],
+  [ 3,   8, 19],
+  [ 4,   6, 21],
+  [ 5,   5, 22],
+  [ 6,   4, 23],
+  [ 7,   3, 24],
+  [ 8,   3, 25],
+  [ 9,   2, 25],
+  [10,   2, 26],
+  [11,   2, 26],
+  [12,   2, 27],
+  [13,   2, 27],
+  [14,   3, 27],
+  [15,   3, 26],
+  [16,   4, 26],
+  [17,   4, 25],
+  [18,   5, 24],
+  [19,   6, 23],
+  [20,   7, 22],
+  [21,   8, 21],
+  [22,  10, 20],
+  [23,  12, 19],
+  [24,  13, 18],
+];
+
+// Extra protruding lobe top-left
+const LOBE = [
+  [ 0,  10, 14],
+  [ 1,   9, 16],
+  [ 2,   8, 17],  // merges into ROWS[0]
+];
+
+// Fill base with mid rock
+for(const[y,x1,x2] of ROWS) hl(y,x1,x2,M);
+for(const[y,x1,x2] of LOBE) hl(y,x1,x2,M);
+
+// ── LIGHT FACE — upper-left receives light ─────────────
+for(const[y,x1,x2] of ROWS){
+  if(y<=10){
+    const w=x2-x1;
+    hl(y,x1,x1+Math.floor(w*0.45),H);
+    hl(y,x1,x1+Math.floor(w*0.2),HL);
+  } else if(y<=15){
+    const w=x2-x1;
+    hl(y,x1,x1+Math.floor(w*0.3),L2);
+  }
+}
+for(const[y,x1,x2] of LOBE){
+  hl(y,x1,x2,H);
+  hl(y,x1,x1+2,HL);
+}
+
+// ── DARK FACE — lower-right in shadow ─────────────────
+for(const[y,x1,x2] of ROWS){
+  if(y>=16){
+    const w=x2-x1;
+    hl(y,x1+Math.floor(w*0.5),x2,D1);
+    hl(y,x1+Math.floor(w*0.7),x2,D2);
+    hl(y,x1+Math.floor(w*0.85),x2,D3);
+  } else {
+    const w=x2-x1;
+    hl(y,x1+Math.floor(w*0.75),x2,D1);
+    hl(y,x1+Math.floor(w*0.88),x2,D2);
+  }
+}
+
+// ── MID BAND — transition zone ─────────────────────────
+for(const[y,x1,x2] of ROWS){
+  if(y>=10 && y<=16){
+    const w=x2-x1;
+    hl(y,x1+Math.floor(w*0.35),x1+Math.floor(w*0.55),L1);
+  }
+}
+
+// ══════════════════════════════════════
+//  CRATERS — 4 craters of varying size
+// ══════════════════════════════════════
+
+// Crater helper: dark pit, slightly lighter rim
+function crater(cx,cy,r){
+  for(let dy=-r;dy<=r;dy++){
+    for(let dx=-r;dx<=r;dx++){
+      const d=Math.abs(dx)+Math.abs(dy);
+      if(d<=r-1) px(cx+dx,cy+dy,C);
+      else if(d<=r) px(cx+dx,cy+dy,CR);
+      else if(d<=r+1){
+        // Rim highlight only on top-left
+        if(dx<0||dy<0) px(cx+dx,cy+dy,HL);
+      }
+    }
+  }
+}
+
+// Large crater — left zone
+crater(9, 14, 3);
+// Medium crater — right zone
+crater(19, 10, 2);
+// Small crater — bottom center
+crater(15, 20, 2);
+// Tiny crater — upper lobe
+crater(11, 2, 1);
+// Tiny crater — top right area
+crater(21, 15, 1);
+
+// ══════════════════════════════════════
+//  CRACKS / SURFACE LINES
+// ══════════════════════════════════════
+
+// Crack 1 — diagonal from big crater outward
+px(12,11,K); px(13,10,K); px(14,9,K);
+// Crack 2 — horizontal fissure
+hl(17,13,18,K);
+px(12,17,K); px(13,18,K);
+// Crack 3 — right side
+px(22,12,K); px(23,13,K); px(22,14,K);
+// Crack 4 — small top fissure
+px(10,5,K); px(11,4,K);
+
+// ══════════════════════════════════════
+//  OUTLINE — single-pixel perimeter
+// ══════════════════════════════════════
+for(const[y,x1,x2] of [...ROWS,...LOBE]){
+  px(x1,y,K); px(x2,y,K);
+}
+// Top/bottom caps
+hl(0,10,13,K);
+hl(2,9,10,K); hl(2,17,18,K);
+hl(24,13,18,K);
+
+// ── RENDER ────────────────────────────
+const dc=document.getElementById('disp').getContext('2d');
+dc.imageSmoothingEnabled=false;
+dc.drawImage(src,0,0,32,32,0,0,288,288);
+
+function toGrid(){
+  const d=g.getImageData(0,0,32,32).data,out=[];
+  for(let y=0;y<32;y++){
+    const row=[];
+    for(let x=0;x<32;x++){
+      const i=(y*32+x)*4;
+      if(d[i+3]<10){row.push(null);continue;}
+      row.push('#'+[d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join(''));
+    }
+    out.push(row);
+  }
+  return out;
+}
+
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  const b=document.getElementById('copyBtn');
+  navigator.clipboard.writeText(JSON.stringify(toGrid())).then(()=>{
+    b.textContent='Copied!'; b.classList.add('ok');
+    setTimeout(()=>{b.textContent='Copy JSON'; b.classList.remove('ok');},2500);
+  });
+});
+document.getElementById('expBtn').addEventListener('click',()=>{
+  const a=document.createElement('a');
+  a.download='asteroid_32x32.png';
+  a.href=src.toDataURL('image/png'); a.click();
+});
+</script>

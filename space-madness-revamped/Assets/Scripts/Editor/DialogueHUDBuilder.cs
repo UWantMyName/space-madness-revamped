@@ -329,8 +329,12 @@ public static class DialogueHUDBuilder
         AddImage(barBG, bgColor);
 
         // Bar fill
+        // Pivot is set to the left edge (0, 0.5) so that localScale.x shrinks the bar
+        // from right to left, which is what PlayerHUD uses to drive both plain and Filled images.
         var fill   = MakeGO("Fill", barBG.transform);
         StretchFull(fill);
+        var fillRt        = fill.GetComponent<RectTransform>();
+        fillRt.pivot      = new Vector2(0f, 0.5f);
         var fillImg       = AddImage(fill, barColor);
         fillImg.type       = Image.Type.Filled;
         fillImg.fillMethod = Image.FillMethod.Horizontal;
