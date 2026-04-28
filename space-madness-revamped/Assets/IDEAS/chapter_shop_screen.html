@@ -1,0 +1,352 @@
+
+<h2 class="sr-only">Chapter upgrade shop with animated system console log on upgrade purchase</h2>
+<style>
+*{box-sizing:border-box}
+.shop{background:#06060e;border-radius:12px;border:1.5px solid #1e2040;overflow:hidden;font-family:'Courier New',monospace;display:flex;flex-direction:column}
+.tab-btn{flex:1;padding:11px 0;background:transparent;border:none;border-bottom:2px solid transparent;color:#334455;font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:color .15s}
+.tab-btn.active{color:#44aaee;border-bottom-color:#44aaee}
+.tab-btn:hover:not(.active){color:#556677}
+.section{display:none;padding:20px 22px 22px;min-height:420px}
+.section.active{display:block}
+.card{background:#080c18;border:1px solid #1a2030;border-radius:6px;padding:16px}
+.pip{display:inline-block;width:18px;height:10px;border:1px solid #1e2a36;border-radius:1px;margin-right:4px}
+.pip.on{background:#44aaee;border-color:#44aaee}
+.pip.max{background:#ffaa00;border-color:#ffaa00}
+.ubtn{padding:7px 16px;background:transparent;border:1px solid #335566;color:#44aaee;font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;border-radius:3px;cursor:pointer}
+.ubtn:hover:not(:disabled){background:#0a1a2a}
+.ubtn:disabled{border-color:#1a2030;color:#2a3040;cursor:not-allowed}
+.abtn{padding:7px 16px;background:transparent;border:1px solid #664400;color:#cc8800;font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;border-radius:3px;cursor:pointer}
+.abtn:hover:not(:disabled){background:#100800}
+.abtn:disabled{border-color:#1e1800;color:#2a2200;cursor:not-allowed}
+.perk-card{background:#080c18;border:1px solid #1a2030;border-radius:6px;padding:14px}
+.perk-card.locked{opacity:.4}
+.perk-card.owned{border-color:#1e4a2a}
+.console-wrap{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1);border-top:0px solid transparent}
+.console-wrap.open{max-height:170px;border-top:1px solid #0e1828}
+.console-inner{background:#02030a;padding:10px 16px;height:160px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1e2040 transparent}
+</style>
+
+<div class="shop">
+
+  <!-- HEADER -->
+  <div style="background:#08091a;border-bottom:1.5px solid #1a1e3a;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="color:#334455;font-size:9px;letter-spacing:3px;margin-bottom:4px;">CHAPTER 2 COMPLETE</div>
+      <div style="color:#7788aa;font-size:16px;letter-spacing:3px;">UPGRADE TERMINAL</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="color:#554400;font-size:9px;letter-spacing:2px;margin-bottom:3px;">CREDITS</div>
+      <div style="color:#ffaa00;font-size:24px;letter-spacing:1px;" id="cr">850</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div style="background:#050510;border-bottom:1.5px solid #1e2040;display:flex;">
+    <button class="tab-btn active" id="t-sys" onclick="sw('sys')">SYSTEMS</button>
+    <button class="tab-btn" id="t-ars" onclick="sw('ars')">ARSENAL</button>
+    <button class="tab-btn" id="t-pow" onclick="sw('pow')">POWERUPS</button>
+    <button class="tab-btn" id="t-per" onclick="sw('per')">PERKS</button>
+  </div>
+
+  <!-- SYSTEMS -->
+  <div id="s-sys" class="section active">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <span style="color:#33aa55;font-size:18px;">»</span>
+          <span style="color:#99aabb;font-size:11px;letter-spacing:2px;">FIRE RATE</span>
+        </div>
+        <div id="fr-pips" style="margin-bottom:10px;"></div>
+        <div id="fr-stat" style="color:#445566;font-size:10px;margin-bottom:4px;"></div>
+        <div id="fr-next" style="color:#1e3a1e;font-size:10px;margin-bottom:14px;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="fr-cost" style="color:#886600;font-size:10px;"></span>
+          <button class="ubtn" id="fr-btn" onclick="upg('fr')">UPGRADE</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <span style="color:#cc4444;font-size:16px;">◆</span>
+          <span style="color:#99aabb;font-size:11px;letter-spacing:2px;">DAMAGE</span>
+        </div>
+        <div id="dmg-pips" style="margin-bottom:10px;"></div>
+        <div id="dmg-stat" style="color:#445566;font-size:10px;margin-bottom:4px;"></div>
+        <div id="dmg-next" style="color:#1e1a0a;font-size:10px;margin-bottom:14px;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span id="dmg-cost" style="color:#886600;font-size:10px;"></span>
+          <button class="ubtn" id="dmg-btn" onclick="upg('dmg')">UPGRADE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARSENAL -->
+  <div id="s-ars" class="section">
+    <div id="ars-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+
+  <!-- POWERUPS -->
+  <div id="s-pow" class="section">
+    <div style="color:#334455;font-size:9px;letter-spacing:2px;margin-bottom:14px;">SELECT ONE POWERUP PER RUN — TRIGGERED MANUALLY</div>
+    <div id="pow-list" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+  </div>
+
+  <!-- PERKS -->
+  <div id="s-per" class="section">
+    <div style="color:#334455;font-size:9px;letter-spacing:2px;margin-bottom:14px;">PERMANENT ABILITIES — UNLOCK AT UPGRADE MILESTONES</div>
+    <div id="per-list" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+  </div>
+
+  <!-- CONSOLE LOG -->
+  <div class="console-wrap" id="console-wrap">
+    <div class="console-inner" id="console-inner"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#050510;border-top:1.5px solid #1e2040;padding:13px 22px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="color:#1a2a33;font-size:9px;letter-spacing:2px;">CHAPTER 3: VOID BREACH</div>
+    <button style="padding:11px 24px;background:transparent;border:1.5px solid #335577;color:#44aaee;font-family:'Courier New',monospace;font-size:10px;letter-spacing:3px;border-radius:4px;cursor:pointer;" onclick="sendPrompt('Continue to chapter 3')">DEPART →</button>
+  </div>
+
+</div>
+
+<script>
+const G = {
+  credits:850, fr:1, dmg:1,
+  weapons:{pulse:true,spread:true,laser:false,plasma:false},
+  ownedPow:['rocket'], equippedPow:'rocket', ownedPerks:[]
+};
+
+const frLevels=[null,
+  {stat:'1.8 shots/sec',next:'2.4 shots/sec',cost:120},
+  {stat:'2.4 shots/sec',next:'3.2 shots/sec',cost:200},
+  {stat:'3.2 shots/sec',next:'4.4 shots/sec',cost:300},
+  {stat:'4.4 shots/sec',next:'6.0 shots/sec',cost:450},
+  {stat:'6.0 shots/sec',next:null,cost:0}
+];
+const dmgLevels=[null,
+  {stat:'5 dmg/shot',next:'7 dmg/shot',cost:150},
+  {stat:'7 dmg/shot',next:'10 dmg/shot',cost:240},
+  {stat:'10 dmg/shot',next:'14 dmg/shot',cost:360},
+  {stat:'14 dmg/shot',next:'20 dmg/shot',cost:500},
+  {stat:'20 dmg/shot',next:null,cost:0}
+];
+
+const WEAPONS=[
+  {id:'pulse', name:'PULSE CANNON', desc:'Reliable single shot. Balanced all-round.',         cost:0},
+  {id:'spread',name:'SPREAD SHOT',  desc:'3-way burst. Lower single-target damage.',           cost:0},
+  {id:'laser', name:'LASER BEAM',   desc:'Continuous beam. Decimates shields rapidly.',        cost:350},
+  {id:'plasma',name:'PLASMA BOLT',  desc:'Slow heavy shot with large AOE impact radius.',      cost:500}
+];
+const WPSVG={
+  pulse:`<rect x="2" y="9" width="19" height="4" fill="#2266aa" rx="1"/><polygon points="21,11 30,7 30,15" fill="#44aaff"/><rect x="6" y="7" width="3" height="8" fill="#335577" rx="1"/>`,
+  spread:`<rect x="2" y="8" width="15" height="6" fill="#1a2a44" rx="1"/><polygon points="17,7 27,3 27,11" fill="#44aaff"/><polygon points="17,11 27,8 27,14" fill="#2266aa"/><polygon points="17,15 27,13 27,19" fill="#44aaff"/>`,
+  laser:`<rect x="2" y="11" width="21" height="2" fill="#1a2a1a" rx="1"/><circle cx="27" cy="12" r="4.5" fill="#0a2a0a" stroke="#33cc66" stroke-width="1.2"/>`,
+  plasma:`<circle cx="8" cy="12" r="6" fill="#1a1028" stroke="#9944cc" stroke-width="1.2"/><polygon points="14,12 28,8 28,16" fill="#9944cc"/>`
+};
+
+const POWERUPS=[
+  {id:'rocket',      name:'ROCKET',        desc:'Homing missile. High single-target damage.',    cost:0},
+  {id:'mine',        name:'MINE LAYER',     desc:'Drops 3 proximity mines behind the ship.',      cost:80},
+  {id:'deflector',   name:'DEFLECTOR',      desc:'Reflects all projectiles for 3 seconds.',       cost:120},
+  {id:'micromissile',name:'MICRO-MISSILES', desc:'Launches 8 simultaneous homing shots.',         cost:150},
+  {id:'emp',         name:'EMP BURST',      desc:'Stuns all on-screen enemies for 2.5 seconds.',  cost:200},
+  {id:'nova',        name:'NOVA BLAST',     desc:'360° shockwave. Clears the immediate area.',    cost:280}
+];
+
+const PERKS=[
+  {id:'overcharge',  name:'OVERCHARGE',    desc:'For 5s, fire rate +400%. Cooldown: 30s.',          req:'Fire Rate Lv3',       met:()=>G.fr>=3,              cost:300},
+  {id:'voltdrive',   name:'VOLT DRIVE',    desc:'Every 10th shot deals 3× damage.',                 req:'Fire Rate Lv2',       met:()=>G.fr>=2,              cost:250},
+  {id:'chainnova',   name:'CHAIN NOVA',    desc:'Kills explode, dealing 40% dmg to nearby foes.',   req:'Damage Lv3',          met:()=>G.dmg>=3,             cost:350},
+  {id:'ghost',       name:'GHOST PROTOCOL',desc:'0.8s invincibility after taking any damage.',      req:'Damage Lv4',          met:()=>G.dmg>=4,             cost:400},
+  {id:'ironcore',    name:'IRON CORE',     desc:'Permanently increase max HP by 25.',               req:'None',                met:()=>true,                 cost:180},
+  {id:'phaseshield', name:'PHASE SHIELD',  desc:'Shield recharges 2× faster when not firing.',     req:'None',                met:()=>true,                 cost:200},
+  {id:'splitshot',   name:'SPLIT SHOT',    desc:'10% chance each shot splits into 2 on impact.',   req:'Dmg Lv2 + FR Lv2',   met:()=>G.dmg>=2&&G.fr>=2,    cost:320},
+  {id:'critcore',    name:'CRIT CORE',     desc:'5% chance per shot to deal 5× damage.',           req:'Dmg Lv3 + FR Lv3',   met:()=>G.dmg>=3&&G.fr>=3,    cost:480}
+];
+
+// ─── CONSOLE LOG ───────────────────────────────────────────
+let logRunning=false, logQ=[];
+function triggerLog(lines) {
+  const wrap=document.getElementById('console-wrap');
+  const inner=document.getElementById('console-inner');
+  inner.innerHTML='';
+  wrap.classList.add('open');
+  logQ=[...lines]; logRunning=false;
+  nextLog(inner);
+}
+function nextLog(inner) {
+  if(!logQ.length){logRunning=false;return;}
+  logRunning=true;
+  const msg=logQ.shift();
+  const isResult=!logQ.length;
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;gap:8px;margin-bottom:4px;';
+  const pre=document.createElement('span');
+  pre.style.cssText='color:#1a5533;font-size:10px;flex-shrink:0;';
+  pre.textContent='>';
+  const txt=document.createElement('span');
+  txt.style.cssText='font-size:10px;color:'+(isResult?'#cc8800':'#445566')+';';
+  row.appendChild(pre); row.appendChild(txt); inner.appendChild(row);
+  inner.scrollTop=inner.scrollHeight;
+  let i=0;
+  (function type(){
+    if(i<msg.length){txt.textContent+=msg[i++];setTimeout(type,22);}
+    else setTimeout(()=>nextLog(inner), isResult?0:280);
+  })();
+}
+
+const FR_LOGS=[
+  'Accessing fire control module...',
+  'Adjusting trigger cycle timing...',
+  'Tightening motor assembly...',
+];
+const DMG_LOGS=[
+  'Pressurizing payload chamber...',
+  'Injecting uranium shells...',
+  'Recalibrating warhead yield...',
+];
+const WPN_LOGS=[
+  'Scanning weapon module signature...',
+  'Injecting auxiliary power core...',
+  'Rebooting weapons system...',
+];
+const POW_LOGS=[
+  'Scanning ordnance bay...',
+  'Pressure testing new payload...',
+  'Safety interlocks bypassed...',
+];
+const PER_LOGS=[
+  'Accessing perk subroutine registry...',
+  'Compiling ability bytecode...',
+  'Neural integration handshake complete.',
+];
+
+// ─── PIPS ──────────────────────────────────────────────────
+function pips(id,lvl){
+  const el=document.getElementById(id); el.innerHTML='';
+  for(let i=1;i<=5;i++){const s=document.createElement('span');s.className='pip'+(i<=lvl?(lvl>=5?' max':' on'):'');el.appendChild(s);}
+}
+
+// ─── SYSTEMS ───────────────────────────────────────────────
+function rSys(){
+  pips('fr-pips',G.fr); pips('dmg-pips',G.dmg);
+  const fr=frLevels[G.fr], dmg=dmgLevels[G.dmg];
+  document.getElementById('fr-stat').textContent='Current: '+fr.stat;
+  document.getElementById('dmg-stat').textContent='Current: '+dmg.stat;
+  document.getElementById('fr-next').textContent=fr.next?'Next level: '+fr.next:'';
+  document.getElementById('dmg-next').textContent=dmg.next?'Next level: '+dmg.next:'';
+  if(G.fr>=5){document.getElementById('fr-cost').textContent='— MAXED —';document.getElementById('fr-btn').disabled=true;}
+  else{document.getElementById('fr-cost').textContent=fr.cost+' CR';document.getElementById('fr-btn').disabled=G.credits<fr.cost;}
+  if(G.dmg>=5){document.getElementById('dmg-cost').textContent='— MAXED —';document.getElementById('dmg-btn').disabled=true;}
+  else{document.getElementById('dmg-cost').textContent=dmg.cost+' CR';document.getElementById('dmg-btn').disabled=G.credits<dmg.cost;}
+}
+
+function upg(t){
+  const data=t==='fr'?frLevels:dmgLevels, lv=t==='fr'?G.fr:G.dmg;
+  if(lv>=5)return;
+  const cost=data[lv].cost;
+  if(G.credits<cost)return;
+  const oldS=data[lv].stat;
+  G.credits-=cost;
+  if(t==='fr')G.fr++;else G.dmg++;
+  const newS=data[t==='fr'?G.fr:G.dmg].stat;
+  const base=t==='fr'?FR_LOGS:DMG_LOGS;
+  triggerLog([...base, (t==='fr'?'Fire rate':'Damage')+': '+oldS+' → '+newS]);
+  render();
+}
+
+// ─── ARSENAL ───────────────────────────────────────────────
+function rArs(){
+  const el=document.getElementById('ars-list'); el.innerHTML='';
+  WEAPONS.forEach(w=>{
+    const owned=G.weapons[w.id], can=!owned&&G.credits>=w.cost;
+    el.innerHTML+=`<div class="card" style="display:flex;align-items:center;gap:16px;">
+      <div style="width:60px;height:50px;border:1px solid ${owned?'#335577':'#1a2030'};background:${owned?'#0a1520':'#060810'};border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+        <svg width="32" height="24" viewBox="0 0 32 24">${WPSVG[w.id]}</svg>
+      </div>
+      <div style="flex:1;">
+        <div style="color:${owned?'#99aabb':'#445566'};font-size:11px;letter-spacing:2px;margin-bottom:5px;">${w.name}</div>
+        <div style="color:#334455;font-size:10px;line-height:1.5;">${w.desc}</div>
+      </div>
+      <div style="flex-shrink:0;text-align:right;">
+        ${owned
+          ?`<div style="color:#1e6633;font-size:10px;letter-spacing:2px;border:1px solid #1a3a22;padding:5px 12px;border-radius:3px;">OWNED</div>`
+          :`<div style="color:#886600;font-size:10px;margin-bottom:7px;">${w.cost} CR</div>
+            <button class="abtn" ${can?'':'disabled'} onclick="buyW('${w.id}',${w.cost})">${G.credits<w.cost?'NEED CR':'UNLOCK'}</button>`
+        }
+      </div>
+    </div>`;
+  });
+}
+function buyW(id,cost){
+  if(G.credits>=cost){G.credits-=cost;G.weapons[id]=true;
+  const w=WEAPONS.find(x=>x.id===id);
+  triggerLog([...WPN_LOGS,'Module installed: '+w.name]);render();}
+}
+
+// ─── POWERUPS ──────────────────────────────────────────────
+function rPow(){
+  const el=document.getElementById('pow-list'); el.innerHTML='';
+  POWERUPS.forEach(p=>{
+    const owned=G.ownedPow.includes(p.id), eq=G.equippedPow===p.id, can=!owned&&G.credits>=p.cost;
+    el.innerHTML+=`<div class="card" style="cursor:${owned?'pointer':'default'};border:${eq?'1.5px solid #664400':'1px solid #1a2030'};" onclick="${owned?`eqPow('${p.id}')`:``}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <span style="color:${eq?'#cc8800':owned?'#99aabb':'#445566'};font-size:11px;letter-spacing:1px;">${p.name}</span>
+        ${eq?`<span style="color:#664400;font-size:9px;border:1px solid #442200;padding:2px 6px;border-radius:2px;">EQUIPPED</span>`:''}
+      </div>
+      <div style="color:#334455;font-size:10px;line-height:1.5;margin-bottom:10px;">${p.desc}</div>
+      ${!owned?`<div style="text-align:right;"><button class="abtn" ${can?'':'disabled'} onclick="event.stopPropagation();buyPow('${p.id}',${p.cost})">${p.cost} CR — UNLOCK</button></div>`:''}
+    </div>`;
+  });
+}
+function eqPow(id){G.equippedPow=id;rPow();}
+function buyPow(id,cost){
+  if(G.credits>=cost&&!G.ownedPow.includes(id)){
+    G.credits-=cost;G.ownedPow.push(id);G.equippedPow=id;
+    const p=POWERUPS.find(x=>x.id===id);
+    triggerLog([...POW_LOGS,'Loaded: '+p.name]);render();
+  }
+}
+
+// ─── PERKS ─────────────────────────────────────────────────
+function rPer(){
+  const el=document.getElementById('per-list'); el.innerHTML='';
+  PERKS.forEach(p=>{
+    const unlocked=p.met(), owned=G.ownedPerks.includes(p.id), can=unlocked&&!owned&&G.credits>=p.cost;
+    el.innerHTML+=`<div class="perk-card ${!unlocked?'locked':''} ${owned?'owned':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+        <span style="color:${owned?'#33aa55':unlocked?'#aabbcc':'#445566'};font-size:11px;letter-spacing:1px;">${p.name}</span>
+        ${owned?`<span style="color:#228844;font-size:10px;">✓</span>`:!unlocked?`<span style="color:#2a2010;font-size:13px;">▣</span>`:''}
+      </div>
+      <div style="color:#445566;font-size:10px;line-height:1.5;margin-bottom:8px;">${p.desc}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:#2a2010;font-size:9px;">REQ: ${p.req}</span>
+        ${owned?`<span style="color:#1a4422;font-size:9px;letter-spacing:1px;">ACTIVE</span>`
+               :`<button class="abtn" ${can?'':'disabled'} onclick="buyPer('${p.id}',${p.cost})">${p.cost} CR</button>`}
+      </div>
+    </div>`;
+  });
+  const avail=PERKS.filter(p=>p.met()&&!G.ownedPerks.includes(p.id)).length;
+  document.getElementById('t-per').textContent=avail>0?`PERKS [${avail}]`:'PERKS';
+}
+function buyPer(id,cost){
+  if(G.credits>=cost&&!G.ownedPerks.includes(id)){
+    G.credits-=cost;G.ownedPerks.push(id);
+    const p=PERKS.find(x=>x.id===id);
+    triggerLog([...PER_LOGS,'Perk active: '+p.name]);render();
+  }
+}
+
+function sw(name){
+  ['sys','ars','pow','per'].forEach(t=>{
+    document.getElementById('s-'+t).classList.toggle('active',t===name);
+    document.getElementById('t-'+t).classList.toggle('active',t===name);
+  });
+}
+function render(){
+  document.getElementById('cr').textContent=G.credits;
+  rSys();rArs();rPow();rPer();
+}
+render();
+</script>
