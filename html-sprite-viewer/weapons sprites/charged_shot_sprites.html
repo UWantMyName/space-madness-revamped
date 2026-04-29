@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Charged Shot — Diamond</title>
+<style>
+  body{background:#0e0e1a;display:flex;flex-direction:column;align-items:center;gap:20px;padding:2rem;font-family:monospace;}
+  h1{color:#88ddff;font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:0;}
+  .section{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;}
+  .slabel{color:#334466;font-size:10px;letter-spacing:.15em;text-transform:uppercase;}
+  .row{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;}
+  .card{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .chk{background-image:linear-gradient(45deg,#181828 25%,transparent 25%),linear-gradient(-45deg,#181828 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#181828 75%),linear-gradient(-45deg,transparent 75%,#181828 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;background-color:#0a0a18;border:1px solid #1a2244;border-radius:4px;padding:6px;display:inline-block;}
+  canvas{image-rendering:pixelated;display:block;}
+  .lbl{font-size:9px;color:#334466;letter-spacing:.1em;text-transform:uppercase;}
+  .br{display:flex;gap:5px;}
+  button{font-family:monospace;font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer;background:transparent;border:.5px solid #223;color:#446;transition:all .15s;text-transform:uppercase;}
+  button:hover{color:#88ddff;border-color:#88ddff;}
+  button.ok{color:#4ade80;border-color:#4ade80;}
+  hr{width:80%;border:none;border-top:1px solid #181830;}
+</style>
+</head>
+<body>
+<h1>Charged Shot — 6 Frames · 32×32</h1>
+
+<div class="section">
+  <div class="slabel">Charge — diamond growing (1–4)</div>
+  <div class="row" id="chargeRow"></div>
+</div>
+<hr/>
+<div class="section">
+  <div class="slabel">Release — triangle (5–6)</div>
+  <div class="row" id="releaseRow"></div>
+</div>
+
+<script>
+function make32(){const c=document.createElement('canvas');c.width=c.height=32;return c;}
+function px(g,x,y,c){if(x<0||x>31||y<0||y>31)return;g.fillStyle=c;g.fillRect(x,y,1,1);}
+function hl(g,y,x1,x2,c){for(let x=x1;x<=x2;x++)px(g,x,y,c);}
+
+// ── palette — white / cyan / light blue ──────────────────
+const WH ='#ffffff';  // pure white core
+const IW ='#eef8ff';  // inner white
+const CW ='#bbeeff';  // light cyan
+const CY ='#66ccff';  // mid cyan
+const CB ='#33aaee';  // cyan-blue
+const BL ='#1177cc';  // blue
+const DB ='#0044aa';  // deep blue edge
+const OL ='#001133';  // outline
+
+// ── DIAMOND FRAMES ───────────────────────────────────────
+// A diamond is a rotated square. We draw it by filling
+// pixels where |dx|+|dy| <= r (Manhattan circle).
+// Then add wavy wisps on the cardinal edges.
+
+function drawDiamond(g, cx, cy, r){
+  g.clearRect(0,0,32,32);
+
+  for(let dy=-r;dy<=r;dy++){
+    for(let dx=-r;dx<=r;dx++){
+      const md=Math.abs(dx)+Math.abs(dy);
+      if(md>r) continue;
+      const t=md/r; // 0=centre, 1=edge
+      let c;
+      if(t>0.90)      c=OL;
+      else if(t>0.78) c=DB;
+      else if(t>0.64) c=BL;
+      else if(t>0.50) c=CB;
+      else if(t>0.36) c=CY;
+      else if(t>0.22) c=CW;
+      else if(t>0.10) c=IW;
+      else            c=WH;
+      px(g,cx+dx,cy+dy,c);
+    }
+  }
+
+  // Specular — top-left of diamond
+  if(r>=6){
+    px(g,cx-1,cy-1,WH);
+    if(r>=9){ px(g,cx-2,cy-1,IW); px(g,cx-1,cy-2,IW); }
+    if(r>=13){ px(g,cx-3,cy-1,CW); px(g,cx-1,cy-3,CW); px(g,cx-2,cy-2,IW); }
+  }
+
+  // Wavy wisps — jagged energy tendrils from each cardinal tip
+  // Top tip
+  const tw=r; // tip at cy-r
+  if(r>=5){
+    px(g,cx,cy-tw-1,CY);
+    if(r>=8){
+      px(g,cx,cy-tw-2,CB);
+      px(g,cx-1,cy-tw-1,CW);
+      px(g,cx+1,cy-tw-1,CW);
+    }
+    if(r>=11){
+      px(g,cx,cy-tw-3,BL);
+      px(g,cx-1,cy-tw-2,CY);
+      px(g,cx+1,cy-tw-2,CY);
+      px(g,cx-2,cy-tw-1,CB);
+      px(g,cx+2,cy-tw-1,CB);
+    }
+    if(r>=14){
+      px(g,cx-1,cy-tw-3,CB);
+      px(g,cx+1,cy-tw-3,CB);
+      px(g,cx-2,cy-tw-2,CY);
+      px(g,cx+2,cy-tw-2,CY);
+      px(g,cx-3,cy-tw-1,CW);
+      px(g,cx+3,cy-tw-1,CW);
+    }
+  }
+
+  // Bottom tip wisps (shorter — rear of projectile)
+  if(r>=8){
+    px(g,cx,cy+tw+1,CY);
+    px(g,cx-1,cy+tw,CW); px(g,cx+1,cy+tw,CW);
+    if(r>=11){
+      px(g,cx,cy+tw+2,CB);
+      px(g,cx-1,cy+tw+1,CY); px(g,cx+1,cy+tw+1,CY);
+    }
+  }
+
+  // Side wisps — left and right tips
+  if(r>=11){
+    // Left
+    px(g,cx-tw-1,cy,CY);
+    px(g,cx-tw-1,cy-1,CW); px(g,cx-tw-1,cy+1,CW);
+    // Right
+    px(g,cx+tw+1,cy,CY);
+    px(g,cx+tw+1,cy-1,CW); px(g,cx+tw+1,cy+1,CW);
+  }
+  if(r>=14){
+    px(g,cx-tw-2,cy,CB); px(g,cx+tw+2,cy,CB);
+    px(g,cx-tw-2,cy-1,CY); px(g,cx+tw+2,cy-1,CY);
+    px(g,cx-tw-2,cy+1,CY); px(g,cx+tw+2,cy+1,CY);
+  }
+}
+
+// Radii for 4 charge frames
+const RADII=[4, 7, 11, 14];
+const CENTER=15;
+
+const chargeCanvases=RADII.map(r=>{
+  const src=make32();
+  drawDiamond(src.getContext('2d'), CENTER, CENTER, r);
+  return src;
+});
+
+// ── RELEASE FRAMES ────────────────────────────────────────
+// Frame 5: wide flat triangle — diamond squashed horizontally,
+//           taller top spike, wide wavy base
+function drawRelease1(g){
+  g.clearRect(0,0,32,32);
+  const cx=15, cy=16;
+
+  // Triangle: tip at cy-11, base at cy+5, half-width at base = 13
+  // Fill using linear interpolation
+  for(let dy=-11;dy<=5;dy++){
+    const progress=(dy+11)/16; // 0 at tip, 1 at base
+    const hw=Math.round(progress*13);
+    for(let dx=-hw;dx<=hw;dx++){
+      // distance from centre for colour
+      const edgeDist=Math.min(
+        Math.abs(dx)/Math.max(hw,1),
+        (dy+11)/16
+      );
+      const t=Math.max(edgeDist, Math.abs(dx)/Math.max(hw,1));
+      let c;
+      if(t>0.88)      c=OL;
+      else if(t>0.76) c=DB;
+      else if(t>0.62) c=BL;
+      else if(t>0.48) c=CB;
+      else if(t>0.34) c=CY;
+      else if(t>0.20) c=CW;
+      else if(t>0.08) c=IW;
+      else            c=WH;
+      px(g,cx+dx,cy+dy,c);
+    }
+  }
+
+  // Top spike wisp
+  px(g,cx,cy-12,CY); px(g,cx,cy-13,CB); px(g,cx,cy-14,BL);
+  px(g,cx-1,cy-12,CW); px(g,cx+1,cy-12,CW);
+
+  // Wavy base edge — irregular bottom pixels
+  const BASE=cy+5;
+  hl(g,BASE+1,cx-10,cx+10,CY);
+  hl(g,BASE+2,cx-7,cx+7,CB);
+  hl(g,BASE+3,cx-4,cx+4,BL);
+  // Jagged side tendrils
+  px(g,cx-13,cy,CY); px(g,cx-14,cy-1,CB); px(g,cx-14,cy+1,CB);
+  px(g,cx+13,cy,CY); px(g,cx+14,cy-1,CB); px(g,cx+14,cy+1,CB);
+  px(g,cx-12,cy+2,CW); px(g,cx+12,cy+2,CW);
+
+  // Specular
+  px(g,cx-1,cy-7,WH); px(g,cx,cy-7,IW); px(g,cx-1,cy-8,IW);
+}
+
+// Frame 6: elongated triangle — taller and narrower, more pointed
+function drawRelease2(g){
+  g.clearRect(0,0,32,32);
+  const cx=15, cy=18;
+
+  // Taller tip: cy-14, base at cy+5, half-width at base = 9
+  for(let dy=-14;dy<=5;dy++){
+    const progress=(dy+14)/19;
+    const hw=Math.round(progress*9);
+    for(let dx=-hw;dx<=hw;dx++){
+      const t=Math.max(
+        Math.abs(dx)/Math.max(hw,1),
+        (dy+14)/19
+      );
+      let c;
+      if(t>0.88)      c=OL;
+      else if(t>0.76) c=DB;
+      else if(t>0.62) c=BL;
+      else if(t>0.48) c=CB;
+      else if(t>0.34) c=CY;
+      else if(t>0.20) c=CW;
+      else if(t>0.08) c=IW;
+      else            c=WH;
+      px(g,cx+dx,cy+dy,c);
+    }
+  }
+
+  // Long top spike wisps — really prominent on release
+  px(g,cx,cy-15,CY);
+  px(g,cx,cy-16,CB);
+  px(g,cx,cy-17,BL);
+  px(g,cx,cy-18,DB);
+  px(g,cx-1,cy-15,CW); px(g,cx+1,cy-15,CW);
+  px(g,cx-1,cy-16,CY); px(g,cx+1,cy-16,CY);
+
+  // Wavy base (narrower)
+  const BASE=cy+5;
+  hl(g,BASE+1,cx-7,cx+7,CY);
+  hl(g,BASE+2,cx-4,cx+4,CB);
+  hl(g,BASE+3,cx-2,cx+2,BL);
+
+  // Side tendrils (shorter than frame 5 — compressed from launch force)
+  px(g,cx-9,cy+2,CY); px(g,cx-10,cy+1,CB);
+  px(g,cx+9,cy+2,CY); px(g,cx+10,cy+1,CB);
+
+  // Specular
+  px(g,cx-1,cy-9,WH); px(g,cx,cy-9,IW); px(g,cx-1,cy-10,IW);
+}
+
+const rel1=make32(); drawRelease1(rel1.getContext('2d'));
+const rel2=make32(); drawRelease2(rel2.getContext('2d'));
+
+// ── render cards ──────────────────────────────────────────
+function makeCard(src, label, filename){
+  const Z=128;
+  const disp=document.createElement('canvas');
+  disp.width=disp.height=Z;
+  disp.style.cssText=`display:block;image-rendering:pixelated;image-rendering:crisp-edges;width:${Z}px;height:${Z}px;`;
+  const dc=disp.getContext('2d');
+  dc.imageSmoothingEnabled=false;
+  dc.drawImage(src,0,0,32,32,0,0,Z,Z);
+
+  const card=document.createElement('div'); card.className='card';
+  const chk=document.createElement('div'); chk.className='chk'; chk.appendChild(disp);
+  const lbl=document.createElement('div'); lbl.className='lbl'; lbl.textContent=label;
+
+  function toGrid(){
+    const g=src.getContext('2d');
+    const d=g.getImageData(0,0,32,32).data,out=[];
+    for(let y=0;y<32;y++){
+      const row=[];
+      for(let x=0;x<32;x++){
+        const i=(y*32+x)*4;
+        if(d[i+3]<10){row.push(null);continue;}
+        row.push('#'+[d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join(''));
+      }
+      out.push(row);
+    }
+    return out;
+  }
+
+  const copy=document.createElement('button'); copy.textContent='Copy JSON';
+  copy.addEventListener('click',()=>{
+    navigator.clipboard.writeText(JSON.stringify(toGrid())).then(()=>{
+      copy.textContent='Copied!'; copy.classList.add('ok');
+      setTimeout(()=>{copy.textContent='Copy JSON';copy.classList.remove('ok');},2000);
+    });
+  });
+  const exp=document.createElement('button'); exp.textContent='PNG';
+  exp.addEventListener('click',()=>{
+    const a=document.createElement('a');
+    a.download=filename; a.href=src.toDataURL('image/png'); a.click();
+  });
+
+  const br=document.createElement('div'); br.className='br';
+  br.appendChild(copy); br.appendChild(exp);
+  card.appendChild(chk); card.appendChild(lbl); card.appendChild(br);
+  return card;
+}
+
+const cr=document.getElementById('chargeRow');
+chargeCanvases.forEach((src,i)=>{
+  cr.appendChild(makeCard(src,`Charge ${i+1} · r=${RADII[i]}`,`charge_f${i+1}.png`));
+});
+
+const rr=document.getElementById('releaseRow');
+rr.appendChild(makeCard(rel1,'Release 1 · wide','release_f1.png'));
+rr.appendChild(makeCard(rel2,'Release 2 · narrow','release_f2.png'));
+</script>
+</body>
+</html>

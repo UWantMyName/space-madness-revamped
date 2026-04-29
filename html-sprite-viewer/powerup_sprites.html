@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Powerup Sprites</title>
+<style>
+  body{background:#0e0e1a;display:flex;flex-direction:column;align-items:center;gap:24px;padding:2rem;font-family:monospace;}
+  h1{color:#c084fc;font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin:0;}
+  .row{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;}
+  .card{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .chk{background-image:linear-gradient(45deg,#181828 25%,transparent 25%),linear-gradient(-45deg,#181828 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#181828 75%),linear-gradient(-45deg,transparent 75%,#181828 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;background-color:#0a0a18;border:1px solid #222244;border-radius:4px;padding:8px;display:inline-block;}
+  canvas{image-rendering:pixelated;display:block;}
+  .name{font-size:10px;color:#c084fc;letter-spacing:.12em;text-transform:uppercase;}
+  .dim{font-size:9px;color:#334466;letter-spacing:.08em;}
+  .br{display:flex;gap:5px;margin-top:2px;}
+  button{font-family:monospace;font-size:9px;padding:3px 8px;border-radius:3px;cursor:pointer;background:transparent;border:.5px solid #223;color:#446;transition:all .15s;text-transform:uppercase;}
+  button:hover{color:#c084fc;border-color:#c084fc;}
+  button.ok{color:#4ade80;border-color:#4ade80;}
+</style>
+</head>
+<body>
+<h1>Powerup Sprites</h1>
+<div class="row" id="row"></div>
+<script>
+function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function px(g,x,y,c){if(x<0||x>=g.canvas.width||y<0||y>=g.canvas.height)return;g.fillStyle=c;g.fillRect(x,y,1,1);}
+function hl(g,y,x1,x2,c){for(let x=x1;x<=x2;x++)px(g,x,y,c);}
+function rect(g,y1,y2,x1,x2,c){for(let y=y1;y<=y2;y++)hl(g,y,x1,x2,c);}
+
+// ══════════════════════════════════════
+//  1. DEFLECTOR  16×5
+//  A curved arc — energy shield bar
+//  Cyan/blue, slight bow upward at centre
+// ══════════════════════════════════════
+function drawDeflector(){
+  const src=makeCanvas(16,5);
+  const g=src.getContext('2d');
+  g.clearRect(0,0,16,5);
+
+  const OL='#0a1833';
+  const DB='#0055aa';
+  const MB='#0088dd';
+  const CY='#22ccff';
+  const HL='#88eeff';
+  const WH='#ccf8ff';
+
+  // Arc: the shield bows upward at centre
+  // y offsets per column (arc shape):
+  //  col: 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+  const ARC=[4, 3, 2, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 2, 3, 4];
+
+  for(let x=0;x<16;x++){
+    const ay=ARC[x];
+    // Core line at ay
+    px(g,x,ay,CY);
+    // Thicken: one pixel above and below core with dimmer colour
+    if(ay>0)  px(g,x,ay-1,DB);
+    if(ay<4)  px(g,x,ay+1,MB);
+    // Bright highlight on top of arc
+    if(ay===0) px(g,x,ay,WH);
+  }
+  // Hot centre highlight
+  for(const x of [6,7,8,9]){ px(g,x,0,WH); px(g,x,1,HL); }
+  // Tip sparks
+  px(g,0,3,CY); px(g,15,3,CY);
+  px(g,0,2,MB); px(g,15,2,MB);
+
+  return src;
+}
+
+// ══════════════════════════════════════
+//  2. MICROMISSILE  4×6
+//  Tiny missile — sharp tip, fin nub
+// ══════════════════════════════════════
+function drawMicromissile(){
+  const src=makeCanvas(4,6);
+  const g=src.getContext('2d');
+  g.clearRect(0,0,4,6);
+
+  const OL='#0a0a14';
+  const MD='#303048';
+  const M ='#484868';
+  const L ='#6868a0';
+  const HL='#9898c8';
+  const WH='#d0d0ee';
+  const RD='#cc2200';
+  const EN='#ff8800';
+
+  // Tip
+  px(g,1,0,WH); px(g,2,0,WH);
+  // Body
+  px(g,0,1,OL); px(g,1,1,L);  px(g,2,1,HL); px(g,3,1,OL);
+  px(g,0,2,OL); px(g,1,2,M);  px(g,2,2,L);  px(g,3,2,OL);
+  // Red band
+  px(g,0,3,RD); px(g,1,3,RD); px(g,2,3,RD); px(g,3,3,RD);
+  // Fin nub
+  px(g,0,4,OL); px(g,1,4,MD); px(g,2,4,MD); px(g,3,4,OL);
+  // Exhaust (open bottom)
+  px(g,1,5,EN); px(g,2,5,EN);
+
+  return src;
+}
+
+// ══════════════════════════════════════
+//  3. SUPERCHARGER  6×12
+//  Battery — charged top, empty bottom
+// ══════════════════════════════════════
+function drawSupercharger(){
+  const src=makeCanvas(6,12);
+  const g=src.getContext('2d');
+  g.clearRect(0,0,6,12);
+
+  const OL='#1a1a0a';
+  const BG='#0e1818';   // empty cell dark
+  const CH='#00ff88';   // charge green bright
+  const CM='#00cc66';   // charge mid
+  const CD='#008844';   // charge dark
+  const BT='#ccddcc';   // battery body light
+  const BD='#889988';   // battery body mid
+  const YL='#ffee00';   // lightning bolt
+
+  // Terminal nub at top (2px wide, 1px tall)
+  px(g,2,0,BD); px(g,3,0,BD);
+  hl(g,0,2,3,OL);
+
+  // Battery body outline y=1..11
+  for(let y=1;y<=11;y++){ px(g,0,y,OL); px(g,5,y,OL); }
+  hl(g,1,0,5,OL);
+  hl(g,11,0,5,OL);
+
+  // Fill — top 3 cells charged, bottom 2 empty
+  // Cell 1 (y=2-3): full charge
+  hl(g,2,1,4,CH); hl(g,3,1,4,CM);
+  // Cell divider
+  hl(g,4,1,4,OL);
+  // Cell 2 (y=5-6): full charge
+  hl(g,5,1,4,CH); hl(g,6,1,4,CM);
+  // Cell divider
+  hl(g,7,1,4,OL);
+  // Cell 3 (y=8-9): partial — half charge
+  hl(g,8,1,2,CH); hl(g,8,3,4,BG);
+  hl(g,9,1,2,CM); hl(g,9,3,4,BG);
+  // Cell divider
+  hl(g,10,1,4,OL);
+
+  // Side highlights
+  for(let y=2;y<=9;y++) px(g,1,y,BT);
+  // Dark right side
+  for(let y=2;y<=9;y++) px(g,4,y,BD);
+
+  // Lightning bolt in centre (y=2-8, x=2-3)
+  // Simple zigzag: top-right to bottom-left
+  px(g,3,2,YL);
+  px(g,3,3,YL); px(g,2,3,YL);
+  px(g,2,4,YL); px(g,3,4,YL);
+  px(g,3,5,YL);
+  px(g,2,6,YL); px(g,3,6,YL);
+  px(g,2,7,YL);
+
+  return src;
+}
+
+// ══════════════════════════════════════
+//  4. MICROBOT  8×12
+//  Cute spider-robot — round head,
+//  small body, 3 legs each side
+// ══════════════════════════════════════
+function drawMicrobot(){
+  const src=makeCanvas(8,12);
+  const g=src.getContext('2d');
+  g.clearRect(0,0,8,12);
+
+  const OL='#0a0a14';
+  const BD='#223344';   // dark body
+  const BM='#334455';   // mid body
+  const BL='#445566';   // light body
+  const BH='#5577aa';   // highlight
+  const LG='#2a3a4a';   // leg dark
+  const LL='#3a5060';   // leg light
+  const EY='#00ffcc';   // eye glow
+  const ED='#005544';   // eye dark
+  const RD='#ff4422';   // status light red
+
+  // ── HEAD (round-ish) y=0-4, x=1-6 ─────
+  hl(g,0,3,4,BH);                         // top
+  hl(g,1,2,5,BH); px(g,2,1,BL); px(g,5,1,BL);
+  hl(g,2,1,6,BM); px(g,2,2,BH); px(g,5,2,BH); // highlight cheeks
+  hl(g,3,1,6,BM);
+  hl(g,4,2,5,BD);
+  // Outline
+  px(g,1,1,OL); px(g,6,1,OL);
+  px(g,1,2,OL); px(g,6,2,OL);
+  px(g,1,3,OL); px(g,6,3,OL);
+  hl(g,0,2,5,OL); hl(g,4,1,6,OL);
+
+  // ── EYES y=2, x=2-5 ────────────────────
+  px(g,2,2,ED); px(g,3,2,EY);   // left eye
+  px(g,4,2,EY); px(g,5,2,ED);   // right eye
+  px(g,3,1,EY); px(g,4,1,EY);   // eye shine
+
+  // ── ANTENNA y=0 ────────────────────────
+  px(g,3,0,BL); // already set above but add nub
+  // Small dot antenna
+  px(g,3,0,BH); px(g,4,0,BH);
+
+  // ── NECK y=4-5 ─────────────────────────
+  hl(g,5,3,4,BM);
+  px(g,3,4,OL); px(g,4,4,OL);
+  px(g,3,5,OL); px(g,4,5,OL);
+
+  // ── BODY y=5-9, x=2-5 ──────────────────
+  hl(g,5,2,5,BM);
+  hl(g,6,1,6,BD); px(g,2,6,BM); px(g,5,6,BM); px(g,3,6,BH); px(g,4,6,BH);
+  hl(g,7,1,6,BD); px(g,2,7,BL); px(g,5,7,BL);
+  hl(g,8,2,5,BD);
+  hl(g,9,2,5,BD);
+  // Body outline
+  hl(g,5,1,6,OL); hl(g,9,1,6,OL);
+  for(let y=5;y<=9;y++){px(g,1,y,OL);px(g,6,y,OL);}
+
+  // Status light on body
+  px(g,3,7,RD); px(g,4,7,RD);
+
+  // ── LEGS 3 pairs (y=6,7,8) ─────────────
+  // Left legs: x goes outward from x=1
+  // Right legs: x goes outward from x=6
+  // Leg pair 1 (y=6)
+  px(g,0,6,LL); // left
+  px(g,7,6,LL); // right
+  // Leg pair 2 (y=7) — bends outward+down
+  px(g,0,7,LG); px(g,0,8,LL);
+  px(g,7,7,LG); px(g,7,8,LL);
+  // Leg pair 3 (y=8-9) — longer rear legs
+  px(g,0,9,LG); px(g,0,10,LL);
+  px(g,7,9,LG); px(g,7,10,LL);
+
+  // ── FEET ───────────────────────────────
+  px(g,0,11,OL); // left feet tips
+  px(g,7,11,OL);
+
+  return src;
+}
+
+// ── RENDER ALL ────────────────────────
+const SPRITES=[
+  {fn:drawDeflector,  name:'Deflector',    dim:'16×5',  w:16, h:5,  zoom:8,  file:'deflector_16x5.png'},
+  {fn:drawMicromissile,name:'Micromissile', dim:'4×6',   w:4,  h:6,  zoom:20, file:'micromissile_4x6.png'},
+  {fn:drawSupercharger,name:'Supercharger', dim:'6×12',  w:6,  h:12, zoom:16, file:'supercharger_6x12.png'},
+  {fn:drawMicrobot,   name:'Microbot',     dim:'8×12',  w:8,  h:12, zoom:16, file:'microbot_8x12.png'},
+];
+
+const row=document.getElementById('row');
+
+SPRITES.forEach(({fn,name,dim,w,h,zoom,file})=>{
+  const src=fn();
+  const dw=w*zoom, dh=h*zoom;
+  const disp=document.createElement('canvas');
+  disp.width=dw; disp.height=dh;
+  disp.style.cssText=`display:block;image-rendering:pixelated;image-rendering:crisp-edges;width:${dw}px;height:${dh}px;`;
+  const dc=disp.getContext('2d');
+  dc.imageSmoothingEnabled=false;
+  dc.drawImage(src,0,0,w,h,0,0,dw,dh);
+
+  const card=document.createElement('div'); card.className='card';
+  const chk=document.createElement('div'); chk.className='chk'; chk.appendChild(disp);
+  const nm=document.createElement('div'); nm.className='name'; nm.textContent=name;
+  const dm=document.createElement('div'); dm.className='dim'; dm.textContent=dim;
+
+  function toGrid(){
+    const g=src.getContext('2d');
+    const d=g.getImageData(0,0,w,h).data,out=[];
+    for(let y=0;y<h;y++){
+      const r=[];
+      for(let x=0;x<w;x++){
+        const i=(y*w+x)*4;
+        if(d[i+3]<10){r.push(null);continue;}
+        r.push('#'+[d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join(''));
+      }
+      out.push(r);
+    }
+    return out;
+  }
+
+  const copy=document.createElement('button'); copy.textContent='Copy JSON';
+  copy.addEventListener('click',()=>{
+    navigator.clipboard.writeText(JSON.stringify(toGrid())).then(()=>{
+      copy.textContent='Copied!'; copy.classList.add('ok');
+      setTimeout(()=>{copy.textContent='Copy JSON';copy.classList.remove('ok');},2000);
+    });
+  });
+  const exp=document.createElement('button'); exp.textContent='PNG';
+  exp.addEventListener('click',()=>{
+    const a=document.createElement('a');
+    a.download=file; a.href=src.toDataURL('image/png'); a.click();
+  });
+  const br=document.createElement('div'); br.className='br';
+  br.appendChild(copy); br.appendChild(exp);
+  card.appendChild(chk); card.appendChild(nm); card.appendChild(dm); card.appendChild(br);
+  row.appendChild(card);
+});
+</script>
+</body>
+</html>

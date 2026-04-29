@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Spread Shot Pellet 16x16</title>
+<style>
+  body{background:#111128;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px;font-family:monospace;}
+  .chk{background-image:linear-gradient(45deg,#1a1a2e 25%,transparent 25%),linear-gradient(-45deg,#1a1a2e 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1a2e 75%),linear-gradient(-45deg,transparent 75%,#1a1a2e 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;background-color:#0e0e20;border:1px solid #2a2a4a;border-radius:6px;padding:10px;display:inline-block;}
+  canvas{image-rendering:pixelated;display:block;}
+  .br{display:flex;gap:8px;}
+  button{font-family:monospace;font-size:10px;padding:4px 12px;border-radius:3px;cursor:pointer;background:transparent;border:.5px solid #334;color:#778;transition:all .15s;text-transform:uppercase;letter-spacing:.08em;}
+  button:hover{color:#fff;border-color:#aaa;}
+  .lbl{font-family:monospace;font-size:10px;color:#445;letter-spacing:.12em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="lbl">Spread Shot Pellet · 16×16 · shape ~12×12</div>
+<div class="chk">
+  <canvas id="disp" width="256" height="256" style="width:256px;height:256px;"></canvas>
+</div>
+<div class="br">
+  <button id="copyBtn">Copy JSON</button>
+  <button id="expBtn">Export PNG</button>
+</div>
+<script>
+const src=document.createElement('canvas');
+src.width=src.height=16;
+const g=src.getContext('2d');
+
+function px(x,y,c){if(x<0||x>15||y<0||y>15)return;g.fillStyle=c;g.fillRect(x,y,1,1);}
+function hl(y,x1,x2,c){for(let x=x1;x<=x2;x++)px(x,y,c);}
+
+g.clearRect(0,0,16,16);
+
+const OL='#1a0808';
+const D2='#6b1a00';
+const D1='#992200';
+const M ='#cc4400';
+const L1='#ee6600';
+const L2='#ff9922';
+const H ='#ffcc66';
+const WH='#fff0cc';
+
+// ── SILHOUETTE — irregular, ~12x12, centred ───────────────
+// Right side has a bump at y=3-4
+// Left side indents slightly at y=8-9
+// Bottom edge is uneven / jagged
+const ROWS=[
+  [2,  4, 11],
+  [3,  3, 12],
+  [4,  2, 13],  // widest — right bump
+  [5,  2, 13],
+  [6,  2, 12],
+  [7,  2, 12],
+  [8,  3, 12],  // left indents
+  [9,  3, 11],
+  [10, 2, 11],
+  [11, 2, 10],
+  [12, 3,  9],
+  [13, 4,  8],
+];
+
+for(const[y,x1,x2]of ROWS) hl(y,x1,x2,M);
+
+// ── LIGHT FACE upper-left ────────────────────────────────
+hl(2,  4, 10, L2);
+hl(3,  3,  9, L2);
+hl(4,  2,  8, L1);
+hl(5,  2,  7, L1);
+hl(6,  2,  6, L1);
+// Hot core
+px(4,3,H); px(5,3,H); px(6,3,H);
+px(3,4,H); px(4,4,WH); px(5,4,WH); px(6,4,H);
+px(3,5,H); px(4,5,H);  px(5,5,H);
+px(3,3,L2);
+
+// ── DARK FACE lower-right ────────────────────────────────
+hl(6,  8, 12, D1);
+hl(7,  8, 12, D1);
+hl(8,  8, 12, D1);
+hl(9,  7, 11, D1);
+hl(10, 7, 11, D2);
+hl(11, 6, 10, D2);
+hl(12, 5,  9, D2);
+hl(13, 4,  8, D2);
+
+// ── OUTLINE ───────────────────────────────────────────────
+for(const[y,x1,x2]of ROWS){ px(x1,y,OL); px(x2,y,OL); }
+hl(2, 4, 11, OL);
+hl(13, 4, 8, OL);
+
+// ── SPARKS outside silhouette ────────────────────────────
+px(14,4,L2); px(14,6,L1);   // right sparks
+px(13,1,H);                  // top-right
+px(1, 7,L2);                 // left spark
+px(10,14,H); px(11,13,L2);  // bottom sparks
+px(1, 10,L1);
+
+// ── RENDER ────────────────────────────────────────────────
+const dc=document.getElementById('disp').getContext('2d');
+dc.imageSmoothingEnabled=false;
+dc.drawImage(src,0,0,16,16,0,0,256,256);
+
+function toGrid(){
+  const d=g.getImageData(0,0,16,16).data,out=[];
+  for(let y=0;y<16;y++){
+    const row=[];
+    for(let x=0;x<16;x++){
+      const i=(y*16+x)*4;
+      if(d[i+3]<10){row.push(null);continue;}
+      row.push('#'+[d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join(''));
+    }
+    out.push(row);
+  }
+  return out;
+}
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  const b=document.getElementById('copyBtn');
+  navigator.clipboard.writeText(JSON.stringify(toGrid())).then(()=>{
+    b.textContent='Copied!';
+    setTimeout(()=>{b.textContent='Copy JSON';},2500);
+  });
+});
+document.getElementById('expBtn').addEventListener('click',()=>{
+  const a=document.createElement('a');
+  a.download='spread_pellet_16x16.png';
+  a.href=src.toDataURL('image/png'); a.click();
+});
+</script>
+</body>
+</html>

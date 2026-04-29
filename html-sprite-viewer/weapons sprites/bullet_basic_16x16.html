@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Basic Bullet 16x16</title>
+<style>
+  body{background:#111128;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px;font-family:monospace;}
+  .chk{background-image:linear-gradient(45deg,#1a1a2e 25%,transparent 25%),linear-gradient(-45deg,#1a1a2e 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1a2e 75%),linear-gradient(-45deg,transparent 75%,#1a1a2e 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;background-color:#0e0e20;border:1px solid #2a2a4a;border-radius:6px;padding:10px;display:inline-block;}
+  canvas{image-rendering:pixelated;display:block;}
+  .br{display:flex;gap:8px;}
+  button{font-family:monospace;font-size:10px;padding:4px 12px;border-radius:3px;cursor:pointer;background:transparent;border:.5px solid #334;color:#778;transition:all .15s;text-transform:uppercase;letter-spacing:.08em;}
+  button:hover{color:#fff;border-color:#aaa;}
+  .lbl{font-family:monospace;font-size:10px;color:#445;letter-spacing:.12em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="lbl">Basic Bullet · 16×16 · shape 4×12</div>
+<div class="chk">
+  <canvas id="disp" width="256" height="256" style="width:256px;height:256px;"></canvas>
+</div>
+<div class="br">
+  <button id="copyBtn">Copy JSON</button>
+  <button id="expBtn">Export PNG</button>
+</div>
+<script>
+const src=document.createElement('canvas');
+src.width=src.height=16;
+const g=src.getContext('2d');
+
+function px(x,y,c){if(x<0||x>15||y<0||y>15)return;g.fillStyle=c;g.fillRect(x,y,1,1);}
+function hl(y,x1,x2,c){for(let x=x1;x<=x2;x++)px(x,y,c);}
+
+g.clearRect(0,0,16,16);
+
+// shape: x=6..9, y=2..13
+const OL='#1a0808';
+const D ='#880000';
+const M ='#cc1100';
+const L ='#ff3322';
+const H ='#ff7755';
+const TW='#ffcc88';
+const TT='#ffffff';
+
+// tip
+px(7,2,TT); px(8,2,TT);
+px(7,3,TW); px(8,3,TW);
+px(6,4,TW); px(9,4,TW);
+
+// body y=4-10
+hl(4,6,9,L);
+for(let y=5;y<=10;y++){
+  px(6,y,OL); px(7,y,L); px(8,y,H); px(9,y,OL);
+}
+
+// spine highlight
+for(let y=3;y<=10;y++) px(7,y,H);
+px(7,3,TW); px(7,2,TT);
+
+// tail
+hl(11,6,9,M); hl(12,6,9,D);
+px(6,11,OL); px(9,11,OL);
+px(6,12,OL); px(9,12,OL);
+
+// exhaust glow (no outline)
+hl(13,7,8,M);
+px(7,14,'#ff6600'); px(8,14,'#ff6600');
+px(7,15,'#ffaa00'); px(8,15,'#ffaa00');
+
+const dc=document.getElementById('disp').getContext('2d');
+dc.imageSmoothingEnabled=false;
+dc.drawImage(src,0,0,16,16,0,0,256,256);
+
+function toGrid(){
+  const d=g.getImageData(0,0,16,16).data,out=[];
+  for(let y=0;y<16;y++){
+    const row=[];
+    for(let x=0;x<16;x++){
+      const i=(y*16+x)*4;
+      if(d[i+3]<10){row.push(null);continue;}
+      row.push('#'+[d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join(''));
+    }
+    out.push(row);
+  }
+  return out;
+}
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  const b=document.getElementById('copyBtn');
+  navigator.clipboard.writeText(JSON.stringify(toGrid())).then(()=>{
+    b.textContent='Copied!'; setTimeout(()=>{b.textContent='Copy JSON';},2500);
+  });
+});
+document.getElementById('expBtn').addEventListener('click',()=>{
+  const a=document.createElement('a');
+  a.download='bullet_basic_16x16.png';
+  a.href=src.toDataURL('image/png'); a.click();
+});
+</script>
+</body>
+</html>

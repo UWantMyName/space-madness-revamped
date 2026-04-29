@@ -113,6 +113,23 @@ public class DialogueSystem : MonoBehaviour
 
     // ── Public API ───────────────────────────────────────────
 
+    /// <summary>
+    /// Start playing a list of DialogueLines built at runtime.
+    /// Called by DialogueAdapter — no ScriptableObject asset needed.
+    /// </summary>
+    public void Play(List<DialogueLine> lines)
+    {
+        if (lines == null || lines.Count == 0)
+        {
+            Debug.LogWarning("[DialogueSystem] Tried to Play a null or empty line list.");
+            return;
+        }
+
+        var runtimeSequence       = ScriptableObject.CreateInstance<DialogueSequence>();
+        runtimeSequence.lines     = lines;
+        Play(runtimeSequence);
+    }
+
     /// <summary>Start playing a DialogueSequence.</summary>
     public void Play(DialogueSequence sequence)
     {
