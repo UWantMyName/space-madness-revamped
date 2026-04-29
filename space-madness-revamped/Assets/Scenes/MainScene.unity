@@ -2842,7 +2842,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1203949559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3008,6 +3008,55 @@ MonoBehaviour:
   typingSpeed: 35
   autoAdvanceDelay: 3
   cursorBlinkRate: 0.5
+--- !u!1 &1303174626
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1303174628}
+  - component: {fileID: 1303174627}
+  m_Layer: 0
+  m_Name: WaveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1303174627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303174626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc85787ac6f71b8e7a1d4cbf8fa49d8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
+  levelDefinition: {fileID: 0}
+  alienPrefab: {fileID: 0}
+  slotManager: {fileID: 0}
+  alienDefinitionLibrary: []
+  autoStartOnPlay: 1
+--- !u!4 &1303174628
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303174626}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -44.45023, y: 45.40476, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1331684418
 GameObject:
   m_ObjectHideFlags: 0
@@ -4792,6 +4841,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1899174073}
   m_CullTransparentMesh: 1
+--- !u!1 &1970130400
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1970130401}
+  - component: {fileID: 1970130402}
+  m_Layer: 0
+  m_Name: Chapter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1970130401
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1970130400}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1970130402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1970130400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6243f388a8738220a8b65b26e98e5a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChapterParser
+  dialogueAdapter: {fileID: 0}
+  waveManager: {fileID: 1303174627}
+  asteroidSpawner: {fileID: 279657483}
+  chapterFile: {fileID: 0}
+  verboseLogging: 0
 --- !u!1 &1974092478
 GameObject:
   m_ObjectHideFlags: 0
@@ -5358,10 +5456,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 7075349905077366022, guid: def58dee3a4d58cd4b6935eb68373161, type: 3}
-      propertyPath: m_CollisionDetection
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7267073425623127242, guid: def58dee3a4d58cd4b6935eb68373161, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -5503,7 +5597,9 @@ SceneRoots:
   - {fileID: 619394802}
   - {fileID: 2659958869419933999}
   - {fileID: 1606402364}
-  - {fileID: 6885775038733974006}
   - {fileID: 313498877}
   - {fileID: 1203949560}
   - {fileID: 485524428}
+  - {fileID: 1970130401}
+  - {fileID: 1303174628}
+  - {fileID: 6885775038733974006}
