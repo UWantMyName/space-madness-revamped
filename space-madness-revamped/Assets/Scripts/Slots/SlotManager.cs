@@ -33,20 +33,19 @@ public class SlotManager : MonoBehaviour
     // Queue of slot indices not yet assigned, in order
     private Queue<int> _availableSlots;
 
+    // Slot positions when driven at runtime (no SlotDefinition asset)
+    private Vector2[] _runtimeSlots;
+
     // ─────────────────────────────────────────────────────────────────────────
     //  Unity Lifecycle
     // ─────────────────────────────────────────────────────────────────────────
 
     private void Awake()
     {
-        if (definition == null)
-        {
-            Debug.LogError("[SlotManager] No SlotDefinition assigned.", this);
-            enabled = false;
-            return;
-        }
-
-        Initialise();
+        // Definition may be null if this SlotManager is driven at runtime via SetRuntimeSlots().
+        // WaveManager will call SetRuntimeSlots() before any slots are needed in that case.
+        if (definition != null)
+            Initialise();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -60,8 +59,32 @@ public class SlotManager : MonoBehaviour
     public bool AllSlotsAssigned => _availableSlots.Count == 0;
 
     /// <summary>
+    /// Initialises the slot manager from a runtime-generated array of positions.
+    /// Use this when running from RuntimeLevelData instead of a SlotDefinition asset.
+    /// Replaces any previously assigned definition or runtime slots.
+    /// </summary>
+    public void SetRuntimeSlots(Vector2[] positions)
+    {
+        if (positions == null || positions.Length == 0)
+        {
+            Debug.LogError("[SlotManager] SetRuntimeSlots called with null or empty positions.", this);
+            return;
+        }
+
+        _runtimeSlots = positions;
+        definition    = null; // runtime mode — no ScriptableObject needed
+
+        int count       = _runtimeSlots.Length;
+        _occupants      = new AlienController[count];
+        _availableSlots = new Queue<int>(count);
+
+        for (int i = 0; i < count; i++)
+            _availableSlots.Enqueue(i);
+    }
+
+    /// <summary>
     /// Assigns the next available slot to the given alien.
-    /// Sets AlienController.SlotPosition and returns the assigned position.
+    /// Sets AlienController.SlotPosition and returns true on success.
     /// Returns false if no slots remain.
     /// </summary>
     public bool AssignNextSlot(AlienController alien)
@@ -80,7 +103,9 @@ public class SlotManager : MonoBehaviour
 
         int index         = _availableSlots.Dequeue();
         _occupants[index] = alien;
-        alien.SlotPosition = definition.slots[index];
+        alien.SlotPosition = _runtimeSlots != null
+            ? _runtimeSlots[index]
+            : definition.slots[index];
 
         return true;
     }
@@ -120,7 +145,7 @@ public class SlotManager : MonoBehaviour
 
     private void Initialise()
     {
-        int count       = definition.SlotCount;
+        int count       = definition != null ? definition.SlotCount : 0;
         _occupants      = new AlienController[count];
         _availableSlots = new Queue<int>(count);
 

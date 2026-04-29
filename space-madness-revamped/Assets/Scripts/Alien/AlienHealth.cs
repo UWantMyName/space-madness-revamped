@@ -93,10 +93,21 @@ public class AlienHealth : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
+    /// Overrides the max HP from the AlienDefinition.
+    /// Call this immediately after spawning, before any damage is dealt.
+    /// Used by WaveManager when a chapter file specifies a health override.
+    /// </summary>
+    public void SetMaxHP(int newMaxHP)
+    {
+        CurrentHP = Mathf.Max(1, newMaxHP);
+    }
+
+    /// <summary>
     /// Deals damage to the alien.
     /// Safe to call multiple times — ignores hits after death.
     /// </summary>
     public void TakeDamage(int amount = 1)
+
     {
         if (IsDead) return;
 

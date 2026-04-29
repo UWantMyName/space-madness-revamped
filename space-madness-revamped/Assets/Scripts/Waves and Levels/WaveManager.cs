@@ -28,6 +28,16 @@ public class WaveManager : MonoBehaviour
     [Tooltip("SlotManager in the scene. Its definition is swapped per wave.")]
     public SlotManager slotManager;
 
+    [Header("Runtime Library")]
+    [Tooltip("All AlienDefinition assets available to runtime levels.\n" +
+             "The asset name must match the 'type:' value in the chapter file.")]
+    public System.Collections.Generic.List<AlienDefinition> alienDefinitionLibrary = new();
+
+    [Header("Behaviour")]
+    [Tooltip("If true, starts the ScriptableObject-based level automatically on Play.\n" +
+             "Set to false when the ChapterParser drives the level via StartLevel(RuntimeLevelData).")]
+    public bool autoStartOnPlay = true;
+
     // ─────────────────────────────────────────────────────────────────────────
     //  Events
     // ─────────────────────────────────────────────────────────────────────────
@@ -61,8 +71,36 @@ public class WaveManager : MonoBehaviour
 
     private void Start()
     {
-        if (!Validate()) return;
-        StartCoroutine(RunLevel());
+        if (autoStartOnPlay)
+        {
+            if (!Validate()) return;
+            StartCoroutine(RunLevel());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Public API — Runtime Entry Point
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Starts a level from runtime data built by the ChapterParser.
+    /// Call this instead of relying on autoStartOnPlay when the chapter file drives the level.
+    /// </summary>
+    public void StartLevel(RuntimeLevelData data)
+    {
+        if (data == null)
+        {
+            Debug.LogError("[WaveManager] StartLevel called with null RuntimeLevelData.", this);
+            return;
+        }
+
+        if (!ValidateRuntime()) return;
+
+        StopAllCoroutines();
+        LevelComplete    = false;
+        CurrentWaveIndex = -1;
+
+        StartCoroutine(RunRuntimeLevel(data));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -80,6 +118,69 @@ public class WaveManager : MonoBehaviour
         LevelComplete = true;
         OnLevelComplete?.Invoke();
         Debug.Log("[WaveManager] Level complete.");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Runtime Level Sequence
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private IEnumerator RunRuntimeLevel(RuntimeLevelData data)
+    {
+        for (int i = 0; i < data.GroupCount; i++)
+        {
+            yield return RunRuntimeGroup(i, data.Groups[i]);
+
+            if (i < data.GroupCount - 1)
+                yield return new WaitForSeconds(data.DelayBetweenWaves);
+        }
+
+        LevelComplete = true;
+        OnLevelComplete?.Invoke();
+        Debug.Log("[WaveManager] Runtime level complete.");
+    }
+
+    private IEnumerator RunRuntimeGroup(int groupIndex, RuntimeGroupData group)
+    {
+        CurrentWaveIndex = groupIndex;
+
+        Debug.Log($"[WaveManager] Starting group {groupIndex + 1} — {group.Count} aliens.");
+        OnWaveStarted?.Invoke(groupIndex);
+
+        // Resolve the AlienDefinition by name from the library
+        AlienDefinition def = FindDefinition(group.AlienDefinitionName);
+        if (def == null)
+        {
+            Debug.LogError($"[WaveManager] AlienDefinition '{group.AlienDefinitionName}' not found in library. Skipping group.");
+            OnWaveCleared?.Invoke(groupIndex);
+            yield break;
+        }
+
+        // Auto-generate slots for this group
+        Vector2[] slots = SlotGridGenerator.Generate(group.Count);
+        slotManager.SetRuntimeSlots(slots);
+
+        _aliveAliens.Clear();
+
+        yield return new WaitForSeconds(group.DelayBeforeFirstBatch);
+
+        int spawned = 0;
+        while (spawned < group.Count)
+        {
+            int batchEnd = Mathf.Min(spawned + group.BatchSize, group.Count);
+
+            for (int i = spawned; i < batchEnd; i++)
+                SpawnRuntimeAlien(def, group, groupIndex, i);
+
+            spawned = batchEnd;
+
+            if (spawned < group.Count)
+                yield return new WaitForSeconds(group.DelayBetweenBatches);
+        }
+
+        yield return new WaitUntil(() => _aliveAliens.Count == 0);
+
+        Debug.Log($"[WaveManager] Group {groupIndex + 1} cleared.");
+        OnWaveCleared?.Invoke(groupIndex);
     }
 
     private IEnumerator RunWave(int waveIndex)
@@ -135,11 +236,10 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
-        // Spawn off-screen — AlienController.Start() will place it at the correct spawn edge
-        GameObject go      = Instantiate(alienPrefab, Vector3.zero, Quaternion.identity);
-        go.name            = $"Alien_W{CurrentWaveIndex}_A{alienIndex}";
+        GameObject go  = Instantiate(alienPrefab, Vector3.zero, Quaternion.identity);
+        go.name        = $"Alien_W{CurrentWaveIndex}_A{alienIndex}";
 
-        var controller     = go.GetComponent<AlienController>();
+        var controller = go.GetComponent<AlienController>();
         if (controller == null)
         {
             Debug.LogError("[WaveManager] alienPrefab is missing an AlienController component.", go);
@@ -148,19 +248,69 @@ public class WaveManager : MonoBehaviour
         }
 
         controller.definition = def;
+        // NOTE: RuntimePath must be set by the caller when using ScriptableObject-based levels.
+        // For now the ScriptableObject path leaves RuntimePath null — this will be addressed
+        // when ScriptableObject-based levels are deprecated in favour of the chapter file system.
 
-        // Assign slot before Start() runs (Start is called on the first frame after Instantiate)
         slotManager.AssignNextSlot(controller);
-
         _aliveAliens.Add(controller);
 
-        // Listen for death so we can track wave completion
         var health = go.GetComponent<AlienHealth>();
         if (health != null)
             health.OnDeath += () => HandleAlienDeath(controller);
         else
-            Debug.LogWarning($"[WaveManager] '{go.name}' has no AlienHealth component. " +
-                              "Wave completion tracking won't work for this alien.");
+            Debug.LogWarning($"[WaveManager] '{go.name}' has no AlienHealth component.");
+    }
+
+    private void SpawnRuntimeAlien(AlienDefinition def, RuntimeGroupData group, int groupIndex, int alienIndex)
+    {
+        GameObject go  = Instantiate(alienPrefab, Vector3.zero, Quaternion.identity);
+        go.name        = $"Alien_G{groupIndex}_A{alienIndex}";
+
+        var controller = go.GetComponent<AlienController>();
+        if (controller == null)
+        {
+            Debug.LogError("[WaveManager] alienPrefab is missing an AlienController component.", go);
+            Destroy(go);
+            return;
+        }
+
+        controller.definition  = def;
+        controller.RuntimePath = group.Path;
+
+        slotManager.AssignNextSlot(controller);
+        _aliveAliens.Add(controller);
+
+        // Apply health override if specified
+        var health = go.GetComponent<AlienHealth>();
+        if (health != null)
+        {
+            if (group.HealthOverride > 0)
+                health.SetMaxHP(group.HealthOverride);
+
+            health.OnDeath += () => HandleAlienDeath(controller);
+        }
+        else
+        {
+            Debug.LogWarning($"[WaveManager] '{go.name}' has no AlienHealth component.");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Library Lookup
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private AlienDefinition FindDefinition(string typeName)
+    {
+        if (string.IsNullOrWhiteSpace(typeName)) return null;
+
+        foreach (var def in alienDefinitionLibrary)
+        {
+            if (def != null && def.name == typeName)
+                return def;
+        }
+
+        return null;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -185,6 +335,23 @@ public class WaveManager : MonoBehaviour
             return false;
         }
 
+        if (alienPrefab == null)
+        {
+            Debug.LogError("[WaveManager] No alien prefab assigned.", this);
+            return false;
+        }
+
+        if (slotManager == null)
+        {
+            Debug.LogError("[WaveManager] No SlotManager assigned.", this);
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool ValidateRuntime()
+    {
         if (alienPrefab == null)
         {
             Debug.LogError("[WaveManager] No alien prefab assigned.", this);

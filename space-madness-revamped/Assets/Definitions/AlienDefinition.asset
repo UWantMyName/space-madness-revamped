@@ -12,27 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: AlienDefinition
   m_EditorClassIdentifier: Assembly-CSharp::AlienDefinition
-  spawnEdge: 0
-  spawnPosition: 0.5
-  segments:
-  - type: 0
-    angleInDegrees: 0
-    turnDirection: 0
-    sweepDegrees: 0
-    distanceFraction: 0
-    speed: 0
-  - type: 0
-    angleInDegrees: 0
-    turnDirection: 1
-    sweepDegrees: 0
-    distanceFraction: 0
-    speed: 0
-  lissajousFreqX: 3
-  lissajousFreqY: 4
-  lissajousAmplitudeX: 0.1
-  lissajousAmplitudeY: 0.1
-  lissajousPhaseOffset: 3.16
+  lissajousFreqX: 1
+  lissajousFreqY: 1.5
+  lissajousAmplitudeX: 0.5
+  lissajousAmplitudeY: 0.3
+  lissajousPhaseOffset: 0
   maxHP: 3
   shootInterval: 2
   shootIntervalVariance: 0.5
-  previewScreenHeight: 10

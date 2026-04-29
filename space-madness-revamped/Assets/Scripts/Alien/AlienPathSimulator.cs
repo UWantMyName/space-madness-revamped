@@ -9,30 +9,30 @@ using UnityEngine;
 public static class AlienPathSimulator
 {
     /// <summary>
-    /// Simulates the full entry path for an AlienDefinition and returns a list of world-space positions.
+    /// Simulates the full entry path for an AlienRuntimePath and returns a list of world-space positions.
     /// </summary>
-    /// <param name="definition">The alien definition to simulate.</param>
+    /// <param name="path">The runtime path to simulate.</param>
     /// <param name="screenHeight">Screen height in world units (camera orthographicSize × 2).</param>
     /// <param name="aspect">Camera aspect ratio (width / height). Defaults to 16:9.</param>
     /// <param name="samplesPerSegment">How many points to sample per segment. More = smoother preview.</param>
-    public static List<Vector2> Simulate(AlienDefinition definition,
+    public static List<Vector2> Simulate(AlienRuntimePath path,
                                           float screenHeight,
                                           float aspect = 16f / 9f,
                                           int samplesPerSegment = 60)
     {
         var points = new List<Vector2>();
-        if (definition == null || definition.segments == null || definition.segments.Length == 0)
+        if (path == null || path.segments == null || path.segments.Length == 0)
             return points;
 
         float halfH = screenHeight * 0.5f;
         float halfW = halfH * aspect;
 
-        Vector2 pos     = ScreenUtils.GetSpawnPosition(definition.spawnEdge, definition.spawnPosition, halfH, halfW);
-        Vector2 heading = GetInitialHeading(definition);
+        Vector2 pos     = ScreenUtils.GetSpawnPosition(path.spawnEdge, path.spawnPosition, halfH, halfW);
+        Vector2 heading = GetInitialHeading(path);
 
         points.Add(pos);
 
-        foreach (var seg in definition.segments)
+        foreach (var seg in path.segments)
         {
             float worldDist = seg.distanceFraction * screenHeight;
 
@@ -85,12 +85,12 @@ public static class AlienPathSimulator
     //  Helpers
     // ─────────────────────────────────────────────────────────────────────────
 
-    public static Vector2 GetInitialHeading(AlienDefinition definition)
+    public static Vector2 GetInitialHeading(AlienRuntimePath path)
     {
-        if (definition.segments == null || definition.segments.Length == 0)
+        if (path == null || path.segments == null || path.segments.Length == 0)
             return Vector2.down;
 
-        var first = definition.segments[0];
+        var first = path.segments[0];
         return first.type == SegmentType.Linear
             ? ScreenUtils.AngleToDirection(first.angleInDegrees)
             : Vector2.down;

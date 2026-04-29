@@ -38,22 +38,38 @@ public class AlienSegment
 }
 
 // ─────────────────────────────────────────────
-//  Alien Definition  (ScriptableObject)
+//  Alien Runtime Path
 // ─────────────────────────────────────────────
 
-[CreateAssetMenu(fileName = "AlienDefinition", menuName = "Space Madness/Alien Definition")]
-public class AlienDefinition : ScriptableObject
+/// <summary>
+/// Holds the entry path for a group of aliens.
+/// Built at runtime by the level factory from the chapter file's PATH block.
+/// Injected into AlienController at spawn time — not stored in AlienDefinition.
+/// </summary>
+[System.Serializable]
+public class AlienRuntimePath
 {
-    [Header("Spawn")]
+    [Tooltip("Which screen edge this group spawns from.")]
     public SpawnEdge spawnEdge = SpawnEdge.Top;
 
     [Range(0f, 1f)]
     [Tooltip("Position along the spawn edge.\n0 = left / bottom end · 1 = right / top end")]
     public float spawnPosition = 0.5f;
 
-    [Header("Entry Path")]
+    [Tooltip("Ordered segment chain the alien follows after spawning.")]
     public AlienSegment[] segments;
 
+    [Tooltip("Screen height in world units used to draw the entry path gizmo.\nMatch your camera's orthographic size × 2.")]
+    public float previewScreenHeight = 10f;
+}
+
+// ─────────────────────────────────────────────
+//  Alien Definition  (ScriptableObject)
+// ─────────────────────────────────────────────
+
+[CreateAssetMenu(fileName = "AlienDefinition", menuName = "Space Madness/Alien Definition")]
+public class AlienDefinition : ScriptableObject
+{
     [Header("Active — Lissajous")]
     [Tooltip("Oscillation frequency on the X axis.")]
     public float lissajousFreqX = 1f;
@@ -82,7 +98,4 @@ public class AlienDefinition : ScriptableObject
     [Tooltip("± seconds of randomness added to each shoot interval so not every alien fires at the same moment.")]
     public float shootIntervalVariance = 0.5f;
 
-    [Header("Editor Preview")]
-    [Tooltip("Screen height in world units used to draw the entry path gizmo in the Scene view.\nMatch your camera's orthographic size × 2.")]
-    public float previewScreenHeight = 10f;
 }

@@ -43,6 +43,12 @@ public class AlienController : MonoBehaviour
     /// <summary>Assigned externally by the wave/slot manager before the alien is activated.</summary>
     public Vector2 SlotPosition { get; set; }
 
+    /// <summary>
+    /// The entry path for this alien. Injected by WaveManager at spawn time.
+    /// Built by the level factory from the chapter file's PATH block.
+    /// </summary>
+    public AlienRuntimePath RuntimePath { get; set; }
+
     public AlienState     CurrentState    => _state;
     public ActiveSubState CurrentSubState => _activeSubState;
 
@@ -85,8 +91,15 @@ public class AlienController : MonoBehaviour
             return;
         }
 
-        transform.position = ScreenUtils.GetSpawnPosition(definition.spawnEdge, definition.spawnPosition);
-        _currentHeading    = AlienPathSimulator.GetInitialHeading(definition);
+        if (RuntimePath == null)
+        {
+            Debug.LogError($"[AlienController] {gameObject.name} has no RuntimePath assigned.", this);
+            enabled = false;
+            return;
+        }
+
+        transform.position = ScreenUtils.GetSpawnPosition(RuntimePath.spawnEdge, RuntimePath.spawnPosition);
+        _currentHeading    = AlienPathSimulator.GetInitialHeading(RuntimePath);
         _playerTransform   = GameObject.FindGameObjectWithTag("Player")?.transform;
 
         TransitionToEntry();
@@ -116,7 +129,7 @@ public class AlienController : MonoBehaviour
 
     private void BeginSegment(int index)
     {
-        if (index >= definition.segments.Length)
+        if (index >= RuntimePath.segments.Length)
         {
             TransitionToSlotting();
             return;
@@ -125,7 +138,7 @@ public class AlienController : MonoBehaviour
         _segmentIndex    = index;
         _segmentProgress = 0f;
 
-        var seg = definition.segments[index];
+        var seg = RuntimePath.segments[index];
 
         if (seg.type == SegmentType.Linear)
         {
@@ -152,7 +165,7 @@ public class AlienController : MonoBehaviour
 
     private void UpdateEntry()
     {
-        var seg = definition.segments[_segmentIndex];
+        var seg = RuntimePath.segments[_segmentIndex];
 
         if (seg.type == SegmentType.Linear)
         {
@@ -325,12 +338,12 @@ public class AlienController : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (definition == null) return;
+        if (definition == null || RuntimePath == null) return;
 
         float aspect = Camera.main != null ? Camera.main.aspect : 16f / 9f;
 
         // Draw entry path
-        var points = AlienPathSimulator.Simulate(definition, definition.previewScreenHeight, aspect);
+        var points = AlienPathSimulator.Simulate(RuntimePath, RuntimePath.previewScreenHeight, aspect);
         if (points.Count > 1)
         {
             UnityEditor.Handles.color = Color.cyan;
