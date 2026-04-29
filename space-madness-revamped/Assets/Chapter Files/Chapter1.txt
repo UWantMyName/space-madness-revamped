@@ -1,0 +1,47 @@
+// ============================================================
+//  Chapter 1 — First Contact
+//  Test file for ChapterParser
+// ============================================================
+
+// Opening dialogue
+COMMAND: Apophis, do you copy?
+PLAYER: Loud and clear, sir. What's the situation?
+COMMAND: We have inbound hostiles. Three groups, approaching fast.
+PLAYER: Understood. Engaging now.
+
+// First level — two small groups, simple straight paths
+[LEVEL_START | delay_between_waves: 2.0]
+
+    // Group 1 — scouts, enter straight down from the left side of the screen
+    [GROUP | count: 5 | batch_size: 5 | delay_first: 0.5 | delay_between: 0.0]
+        ALIEN | type: FastAlien | health: 2
+        PATH
+            SPAWN | edge: top | position: 0.3
+            [SEG | type: linear | angle: 270 | distance: 0.4 | speed: 6]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — heavier units, enter from the right and arc toward centre
+    [GROUP | count: 5 | batch_size: 5 | delay_first: 0.5 | delay_between: 0.0]
+        ALIEN | type: FastAlien | health: 4
+        PATH
+            SPAWN | edge: top | position: 0.7
+            [SEG | type: linear | angle: 270 | distance: 0.2 | speed: 4]
+            [SEG | type: arc    | turn: left  | sweep: 45    | distance: 0.25 | speed: 4]
+            [SEG | type: linear | angle: 270  | distance: 0.2 | speed: 4]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// Mid-battle dialogue
+COMMAND: Good work. But there's more coming — and they brought rocks.
+PLAYER: Rocks? You mean...
+COMMAND: Asteroid field. Stay sharp.
+
+// Asteroid level
+[LEVEL: asteroids | nr_small: 5 | nr_medium: 3 | nr_large: 2]
+
+// Closing dialogue
+COMMAND: Sector clear. Stand by for further orders.
+PLAYER: Copy that. Awaiting instructions.

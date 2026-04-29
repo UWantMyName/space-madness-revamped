@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
-  m_Name: AlienDefinition
+  m_Name: FastAlien
   m_EditorClassIdentifier: Assembly-CSharp::AlienDefinition
   lissajousFreqX: 1
   lissajousFreqY: 1.5

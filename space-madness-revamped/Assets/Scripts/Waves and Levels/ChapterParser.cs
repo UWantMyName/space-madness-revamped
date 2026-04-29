@@ -82,6 +82,7 @@ public class ChapterParser : MonoBehaviour
         if (!ValidateReferences()) return;
 
         string[] lines = chapterFile.text.Split('\n');
+        print("Started chapter.");
         StartCoroutine(RunChapter(lines));
     }
 
