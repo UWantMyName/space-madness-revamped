@@ -2269,7 +2269,7 @@ MonoBehaviour:
   dialogueAdapter: {fileID: 1133335343}
   waveManager: {fileID: 503312340}
   asteroidSpawner: {fileID: 390490054}
-  chapterFile: {fileID: 4900000, guid: 609e7c4a91aa9340c8ff9d46ff009159, type: 3}
+  chapterFile: {fileID: 4900000, guid: 6c6179ab931f69d85901fdc1d7a32cef, type: 3}
   verboseLogging: 1
 --- !u!1 &809077174
 GameObject:

@@ -1,0 +1,452 @@
+// ============================================================
+//  CHAPTER 1 — CONTACT
+// ============================================================
+
+// ─────────────────────────────────────────────
+//  LEVEL 1 — Approach
+// ─────────────────────────────────────────────
+
+SYSTEM: Approaching Earth orbit.
+SYSTEM: Patrol route confirmed.
+COMMAND: Apophis, report status.
+PLAYER: Clear approach. No hostile activity detected.
+COMMAND: Roger that. Proceed your course to Earth.
+
+// Light patrol — two small formations passing through, not aggressive yet
+[LEVEL_START | delay_between_waves: 3.0]
+
+    // Formation 1 — 6 units gliding across from left to right
+    [GROUP | count: 6 | batch_size: 6 | delay_first: 0.5 | delay_between: 0.0]
+        ALIEN | type: FastAlien | health: 2
+        PATH
+            SPAWN | edge: left | position: 0.75
+            [SEG | type: linear | angle: 0    | distance: 0.2  | speed: 4]
+            [SEG | type: arc    | turn: right  | sweep: 45     | distance: 0.2 | speed: 4]
+            [SEG | type: linear | angle: 270   | distance: 0.4  | speed: 4]
+        PATH_END
+    GROUP_END
+
+    // Formation 2 — 6 units mirrored from the right
+    [GROUP | count: 6 | batch_size: 6 | delay_first: 0.5 | delay_between: 0.0]
+        ALIEN | type: FastAlien | health: 2
+        PATH
+            SPAWN | edge: right | position: 0.75
+            [SEG | type: linear | angle: 180   | distance: 0.2  | speed: 4]
+            [SEG | type: arc    | turn: left    | sweep: 45     | distance: 0.2 | speed: 4]
+            [SEG | type: linear | angle: 270    | distance: 0.4  | speed: 4]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// ─────────────────────────────────────────────
+//  LEVEL 2 — First Contact
+// ─────────────────────────────────────────────
+
+SYSTEM: Unidentified signatures detected.
+PLAYER: Command, I'm seeing contacts on my radar. No transponder data.
+COMMAND: Acknowledged. Monitor them and engage if necessary.
+
+// First probing wave — cautious, slow, feeling out the player
+[LEVEL_START | delay_between_waves: 2.0]
+
+    // Group 1 — 8 units approaching slowly down the centre
+    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 2.0]
+        ALIEN | type: FastAlien | health: 3
+        PATH
+            SPAWN | edge: top | position: 0.5
+            [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 3]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 6 units creeping in from the left flank
+    [GROUP | count: 6 | batch_size: 3 | delay_first: 1.0 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 3
+        PATH
+            SPAWN | edge: top | position: 0.2
+            [SEG | type: linear | angle: 270  | distance: 0.2 | speed: 3]
+            [SEG | type: arc    | turn: right  | sweep: 30    | distance: 0.2 | speed: 3]
+            [SEG | type: linear | angle: 270   | distance: 0.25 | speed: 3]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+SYSTEM: Warning. Hostile activity detected!
+
+// They attack now — faster and more aggressive
+[LEVEL_START | delay_between_waves: 1.5]
+
+    // Group 1 — 10 units diving fast down the middle
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 3
+        PATH
+            SPAWN | edge: top | position: 0.5
+            [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 6]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 8 units diving from the left
+    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 3
+        PATH
+            SPAWN | edge: top | position: 0.25
+            [SEG | type: linear | angle: 270  | distance: 0.15 | speed: 6]
+            [SEG | type: arc    | turn: right  | sweep: 40     | distance: 0.25 | speed: 6]
+            [SEG | type: linear | angle: 270   | distance: 0.3  | speed: 6]
+        PATH_END
+    GROUP_END
+
+    // Group 3 — 8 units diving from the right
+    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 3
+        PATH
+            SPAWN | edge: top | position: 0.75
+            [SEG | type: linear | angle: 270  | distance: 0.15 | speed: 6]
+            [SEG | type: arc    | turn: left   | sweep: 40     | distance: 0.25 | speed: 6]
+            [SEG | type: linear | angle: 270   | distance: 0.3  | speed: 6]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// ─────────────────────────────────────────────
+//  LEVEL 3 — Escalation
+// ─────────────────────────────────────────────
+
+SYSTEM: Multiple signatures inbound.
+PLAYER: Their formations are ... tight. Not sure how much I can cope with this.
+COMMAND: Sensors are still calibrating. Stand by.
+SYSTEM: Large signature count detected.
+
+// Wave 1 — Heavy frontal assault
+[LEVEL_START | delay_between_waves: 2.0]
+
+    // Group 1 — 12 units hammering straight down
+    [GROUP | count: 12 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: top | position: 0.5
+            [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 5]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 10 units sweeping in from the left in a wide arc
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 4
+        PATH
+            SPAWN | edge: left | position: 0.8
+            [SEG | type: linear | angle: 0    | distance: 0.15 | speed: 5]
+            [SEG | type: arc    | turn: right  | sweep: 90     | distance: 0.3  | speed: 5]
+            [SEG | type: linear | angle: 270   | distance: 0.3  | speed: 5]
+        PATH_END
+    GROUP_END
+
+    // Group 3 — 10 units sweeping in from the right
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 4
+        PATH
+            SPAWN | edge: right | position: 0.8
+            [SEG | type: linear | angle: 180   | distance: 0.15 | speed: 5]
+            [SEG | type: arc    | turn: left    | sweep: 90     | distance: 0.3  | speed: 5]
+            [SEG | type: linear | angle: 270    | distance: 0.3  | speed: 5]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// Wave 2 — Larger, slower, tougher structures
+[LEVEL_START | delay_between_waves: 2.5]
+
+    // Group 1 — 15 tanks grinding down the centre
+    [GROUP | count: 15 | batch_size: 5 | delay_first: 1.0 | delay_between: 2.0]
+        ALIEN | type: FastAlien | health: 8
+        PATH
+            SPAWN | edge: top | position: 0.5
+            [SEG | type: linear | angle: 270  | distance: 0.2  | speed: 3]
+            [SEG | type: arc    | turn: left   | sweep: 30     | distance: 0.15 | speed: 3]
+            [SEG | type: arc    | turn: right   | sweep: 60    | distance: 0.2  | speed: 3]
+            [SEG | type: linear | angle: 270    | distance: 0.2  | speed: 3]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 10 units in a wide pincer from top-left
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 6
+        PATH
+            SPAWN | edge: top | position: 0.1
+            [SEG | type: linear | angle: 270  | distance: 0.1  | speed: 4]
+            [SEG | type: arc    | turn: right  | sweep: 50     | distance: 0.3  | speed: 4]
+            [SEG | type: linear | angle: 270   | distance: 0.3  | speed: 4]
+        PATH_END
+    GROUP_END
+
+    // Group 3 — 10 units in a wide pincer from top-right
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 6
+        PATH
+            SPAWN | edge: top | position: 0.9
+            [SEG | type: linear | angle: 270  | distance: 0.1  | speed: 4]
+            [SEG | type: arc    | turn: left   | sweep: 50     | distance: 0.3  | speed: 4]
+            [SEG | type: linear | angle: 270   | distance: 0.3  | speed: 4]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// Wave 3 — Frantic close-quarters assault
+[LEVEL_START | delay_between_waves: 2.0]
+
+    // Group 1 — 12 fast units pouring from the top in rapid batches
+    [GROUP | count: 12 | batch_size: 3 | delay_first: 0.3 | delay_between: 0.8]
+        ALIEN | type: FastAlien | health: 4
+        PATH
+            SPAWN | edge: top | position: 0.35
+            [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 7]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 12 fast units from the other side
+    [GROUP | count: 12 | batch_size: 3 | delay_first: 0.3 | delay_between: 0.8]
+        ALIEN | type: FastAlien | health: 4
+        PATH
+            SPAWN | edge: top | position: 0.65
+            [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 7]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// ─────────────────────────────────────────────
+//  LEVEL 4 — Squadron Arrival
+// ─────────────────────────────────────────────
+
+HERMES: Took you long enough to find some action, Apophis.
+CERES: Focus up, team. These are not your usual aliens.
+PLAYER: Good to see you guys!
+
+// Wave 1 — Reinforced assault with the squadron now active
+[LEVEL_START | delay_between_waves: 2.0]
+
+    // Group 1 — 15 units in tight formation down the centre
+    [GROUP | count: 15 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: top | position: 0.5
+            [SEG | type: linear | angle: 270 | distance: 0.4 | speed: 5]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 10 units sweeping from the left
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: left | position: 0.7
+            [SEG | type: linear | angle: 0    | distance: 0.1  | speed: 5]
+            [SEG | type: arc    | turn: right  | sweep: 80     | distance: 0.3  | speed: 5]
+            [SEG | type: linear | angle: 270   | distance: 0.25 | speed: 5]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// Wave 2
+[LEVEL_START | delay_between_waves: 2.0]
+
+    // Group 1 — 12 units in a zigzag pattern
+    [GROUP | count: 12 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 6
+        PATH
+            SPAWN | edge: top | position: 0.5
+            [SEG | type: linear | angle: 270  | distance: 0.15 | speed: 4]
+            [SEG | type: arc    | turn: left   | sweep: 50     | distance: 0.2  | speed: 4]
+            [SEG | type: arc    | turn: right   | sweep: 100   | distance: 0.3  | speed: 4]
+            [SEG | type: arc    | turn: left    | sweep: 50    | distance: 0.2  | speed: 4]
+            [SEG | type: linear | angle: 270    | distance: 0.1 | speed: 4]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 8 flankers from the right
+    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: right | position: 0.6
+            [SEG | type: linear | angle: 180   | distance: 0.1  | speed: 5]
+            [SEG | type: arc    | turn: left    | sweep: 80     | distance: 0.3  | speed: 5]
+            [SEG | type: linear | angle: 270    | distance: 0.3  | speed: 5]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// ─────────────────────────────────────────────
+//  LEVEL 5 — Malfunction
+// ─────────────────────────────────────────────
+
+SYSTEM: Ally signal unstable.
+DIDYMOS: Uhm, command, I'm reading power fluctuations in my ship.
+
+[LEVEL_START | delay_between_waves: 2.0]
+
+    // Group 1 — 12 units pressing in while Didymos struggles
+    [GROUP | count: 12 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: top | position: 0.45
+            [SEG | type: linear | angle: 270 | distance: 0.45 | speed: 5]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 10 units from the right flank
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: top | position: 0.8
+            [SEG | type: linear | angle: 270  | distance: 0.15 | speed: 5]
+            [SEG | type: arc    | turn: left   | sweep: 45     | distance: 0.25 | speed: 5]
+            [SEG | type: linear | angle: 270   | distance: 0.3  | speed: 5]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+DIDYMOS: Controls feel sluggish. I'm losing power in my thrusters.
+CERES: Didymos, pull back.
+DIDYMOS: Roger that.
+SYSTEM: Ally signal lost!
+
+// ─────────────────────────────────────────────
+//  LEVEL 6 — Aftermath
+// ─────────────────────────────────────────────
+
+// Wave 1 — smaller but relentless
+[LEVEL_START | delay_between_waves: 2.5]
+
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 4
+        PATH
+            SPAWN | edge: top | position: 0.4
+            [SEG | type: linear | angle: 270 | distance: 0.45 | speed: 5]
+        PATH_END
+    GROUP_END
+
+    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 4
+        PATH
+            SPAWN | edge: top | position: 0.6
+            [SEG | type: linear | angle: 270 | distance: 0.45 | speed: 5]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+PLAYER: ...Didymos?
+COMMAND: Apophis, report status!
+PLAYER: I saw... an explosion. Didymos... he's down.
+SYSTEM: Emergency beacon detected. Trajectory: unknown.
+CERES: That wasn't an accident. His systems were hacked.
+
+// Wave 2 — retaliatory strike
+[LEVEL_START | delay_between_waves: 2.0]
+
+    // Group 1 — 12 units in aggressive straight dive
+    [GROUP | count: 12 | batch_size: 4 | delay_first: 0.3 | delay_between: 1.0]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: top | position: 0.5
+            [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 6]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 10 units flanking hard from the left
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: left | position: 0.65
+            [SEG | type: linear | angle: 0    | distance: 0.15 | speed: 6]
+            [SEG | type: arc    | turn: right  | sweep: 90     | distance: 0.3  | speed: 6]
+            [SEG | type: linear | angle: 270   | distance: 0.2  | speed: 6]
+        PATH_END
+    GROUP_END
+
+    // Group 3 — 8 units flanking from the right
+    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 5
+        PATH
+            SPAWN | edge: right | position: 0.65
+            [SEG | type: linear | angle: 180   | distance: 0.15 | speed: 6]
+            [SEG | type: arc    | turn: left    | sweep: 90     | distance: 0.3  | speed: 6]
+            [SEG | type: linear | angle: 270    | distance: 0.2  | speed: 6]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// Wave 3 — smaller wave, but they keep coming
+[LEVEL_START | delay_between_waves: 2.0]
+
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 6
+        PATH
+            SPAWN | edge: top | position: 0.3
+            [SEG | type: linear | angle: 270  | distance: 0.2  | speed: 5]
+            [SEG | type: arc    | turn: right  | sweep: 40     | distance: 0.2  | speed: 5]
+            [SEG | type: linear | angle: 270   | distance: 0.25 | speed: 5]
+        PATH_END
+    GROUP_END
+
+    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 6
+        PATH
+            SPAWN | edge: top | position: 0.7
+            [SEG | type: linear | angle: 270  | distance: 0.2  | speed: 5]
+            [SEG | type: arc    | turn: left   | sweep: 40     | distance: 0.2  | speed: 5]
+            [SEG | type: linear | angle: 270   | distance: 0.25 | speed: 5]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
+
+// ─────────────────────────────────────────────
+//  LEVEL 7 — The Extractor
+// ─────────────────────────────────────────────
+
+SYSTEM: Massive energy signature detected.
+PLAYER: That thing isn't here to fight.
+ENEMY UNIT: Specimen secured. Prepare system jump.
+
+// Escort wave — protecting the Extractor while it works
+[LEVEL_START | delay_between_waves: 1.5]
+
+    // Group 1 — 20 escorts pouring in fast from all angles
+    [GROUP | count: 20 | batch_size: 5 | delay_first: 0.3 | delay_between: 1.0]
+        ALIEN | type: FastAlien | health: 4
+        PATH
+            SPAWN | edge: top | position: 0.5
+            [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 7]
+        PATH_END
+    GROUP_END
+
+    // Group 2 — 15 heavies grinding down the left
+    [GROUP | count: 15 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 8
+        PATH
+            SPAWN | edge: top | position: 0.2
+            [SEG | type: linear | angle: 270  | distance: 0.3  | speed: 4]
+            [SEG | type: arc    | turn: right  | sweep: 30     | distance: 0.2  | speed: 4]
+            [SEG | type: linear | angle: 270   | distance: 0.2  | speed: 4]
+        PATH_END
+    GROUP_END
+
+    // Group 3 — 15 heavies grinding down the right
+    [GROUP | count: 15 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 8
+        PATH
+            SPAWN | edge: top | position: 0.8
+            [SEG | type: linear | angle: 270  | distance: 0.3  | speed: 4]
+            [SEG | type: arc    | turn: left   | sweep: 30     | distance: 0.2  | speed: 4]
+            [SEG | type: linear | angle: 270   | distance: 0.2  | speed: 4]
+        PATH_END
+    GROUP_END
+
+[LEVEL_END]
