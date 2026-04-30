@@ -39,6 +39,10 @@ public abstract class ProjectileBase : MonoBehaviour
     /// <summary>Damage this projectile deals. Set by WeaponController after instantiation.</summary>
     public int Damage { get; set; } = 1;
 
+    // Prevents OnTriggerEnter2D firing on multiple overlapping colliders
+    // before Destroy() takes effect at end of frame
+    private bool _hasHit = false;
+
     // ─────────────────────────────────────────────────────────────────────────
     //  Unity Lifecycle
     // ─────────────────────────────────────────────────────────────────────────
@@ -68,6 +72,8 @@ public abstract class ProjectileBase : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (_hasHit) return;
+
         // Ignore other projectiles and the player
         if (other.CompareTag("Player"))   return;
         if (other.CompareTag("Projectile")) return;
@@ -114,12 +120,14 @@ public abstract class ProjectileBase : MonoBehaviour
     /// <summary>Deals damage and destroys self. Call from subclasses.</summary>
     protected void HitAndDestroy(AlienHealth enemy)
     {
+        _hasHit = true;
         enemy.TakeDamage(Damage);
         Destroy(gameObject);
     }
 
     protected void HitAndDestroy(Asteroid asteroid)
     {
+        _hasHit = true;
         asteroid.TakeDamage(Damage);
         Destroy(gameObject);
     }
