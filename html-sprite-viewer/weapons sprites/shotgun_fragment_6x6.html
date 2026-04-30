@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Fragment 6x6</title>
+<style>
+  body{background:#111128;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px;font-family:monospace;}
+  .chk{background-image:linear-gradient(45deg,#1a1a2e 25%,transparent 25%),linear-gradient(-45deg,#1a1a2e 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1a2e 75%),linear-gradient(-45deg,transparent 75%,#1a1a2e 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0;background-color:#0e0e20;border:1px solid #2a2a4a;border-radius:6px;padding:10px;display:inline-block;}
+  canvas{image-rendering:pixelated;display:block;}
+  .br{display:flex;gap:8px;}
+  button{font-family:monospace;font-size:10px;padding:4px 12px;border-radius:3px;cursor:pointer;background:transparent;border:.5px solid #334;color:#778;transition:all .15s;text-transform:uppercase;letter-spacing:.08em;}
+  button:hover{color:#fff;border-color:#aaa;}
+  .lbl{font-family:monospace;font-size:10px;color:#445;letter-spacing:.12em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="lbl">Spread Fragment · 6×6 in 16×16</div>
+<div class="chk">
+  <canvas id="disp" width="256" height="256" style="width:256px;height:256px;"></canvas>
+</div>
+<div class="br">
+  <button id="copyBtn">Copy JSON</button>
+  <button id="expBtn">Export PNG</button>
+</div>
+<script>
+const src=document.createElement('canvas');
+src.width=src.height=16;
+const g=src.getContext('2d');
+
+function px(x,y,c){if(x<0||x>15||y<0||y>15)return;g.fillStyle=c;g.fillRect(x,y,1,1);}
+
+g.clearRect(0,0,16,16);
+
+// Fragment centred: x=5..10, y=5..10 (6x6 zone)
+// Same palette as pellet
+const OL='#1a0808';
+const D2='#6b1a00';
+const D1='#992200';
+const M ='#cc4400';
+const L1='#ee6600';
+const L2='#ff9922';
+const H ='#ffcc66';
+const WH='#fff0cc';
+
+// Jagged irregular silhouette — not symmetric on any axis
+// Looks like a shard torn from the top-right of the pellet
+// Row by row (y=5..10):
+//   y=5:  x=7,8        — narrow tip
+//   y=6:  x=6,7,8,9    — widens
+//   y=7:  x=5,6,7,8,9  — widest, left protrusion
+//   y=8:  x=5,6,7,8    — right side chips away
+//   y=9:  x=6,7,8,9,10 — right protrusion
+//   y=10: x=7,8,9      — tapers to jagged bottom
+
+// Fill
+px(7,5,L2); px(8,5,H);                              // tip row — 2px
+px(6,6,L1); px(7,6,L2); px(8,6,H);  px(9,6,M);     // 4px
+px(5,7,M);  px(6,7,L1); px(7,7,WH); px(8,7,H); px(9,7,L1); // 5px widest
+px(5,8,D1); px(6,8,M);  px(7,8,L1); px(8,8,M);      // 4px right chips
+px(6,9,D1); px(7,9,M);  px(8,9,L1); px(9,9,L2); px(10,9,M); // 5px right prot
+px(7,10,D2); px(8,10,D1); px(9,10,M);               // 3px jagged base
+
+// Outline — darken perimeter pixels
+// Top tip
+px(7,5,OL); px(8,5,L2);
+// Left edges
+px(6,6,OL); px(5,7,OL); px(5,8,OL);
+// Right edges
+px(9,6,OL); px(9,7,OL);
+px(8,8,OL);
+px(10,9,OL);
+// Bottom
+px(7,10,OL); px(9,10,OL);
+
+// Hot bright core — small specular
+px(7,7,WH); px(8,6,H);
+
+// Scatter sparks outside the shape — 3 lone pixels
+px(11,8,L2);   // right spark
+px(5,10,L1);   // bottom-left spark
+px(9,4,H);     // top spark
+
+const dc=document.getElementById('disp').getContext('2d');
+dc.imageSmoothingEnabled=false;
+dc.drawImage(src,0,0,16,16,0,0,256,256);
+
+function toGrid(){
+  const d=g.getImageData(0,0,16,16).data,out=[];
+  for(let y=0;y<16;y++){
+    const row=[];
+    for(let x=0;x<16;x++){
+      const i=(y*16+x)*4;
+      if(d[i+3]<10){row.push(null);continue;}
+      row.push('#'+[d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join(''));
+    }
+    out.push(row);
+  }
+  return out;
+}
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  const b=document.getElementById('copyBtn');
+  navigator.clipboard.writeText(JSON.stringify(toGrid())).then(()=>{
+    b.textContent='Copied!'; setTimeout(()=>{b.textContent='Copy JSON';},2500);
+  });
+});
+document.getElementById('expBtn').addEventListener('click',()=>{
+  const a=document.createElement('a');
+  a.download='spread_fragment_6x6.png';
+  a.href=src.toDataURL('image/png'); a.click();
+});
+</script>
+</body>
+</html>

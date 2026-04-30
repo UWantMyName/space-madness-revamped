@@ -32,7 +32,7 @@ public class WeaponHUDController : MonoBehaviour
 
     [Header("Weapon Data")]
     [Tooltip("Weapon name for each slot. Must match slot count.")]
-    public string[] weaponNames  = { "PULSE CANNON", "SPREAD SHOT", "LASER BEAM", "MISSILE" };
+    public string[] weaponNames  = { "PULSE CANNON", "SHOTGUN", "CHARGE SHOT", "MISSILE" };
 
     [Tooltip("Weapon icon sprite for each slot. Assign in Inspector.")]
     public Sprite[] weaponSprites = new Sprite[4];

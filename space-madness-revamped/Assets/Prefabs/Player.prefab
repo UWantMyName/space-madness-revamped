@@ -44,9 +44,9 @@ GameObject:
   - component: {fileID: 4243134855497921529}
   - component: {fileID: 8709806125575173006}
   - component: {fileID: 6423438705620230891}
-  - component: {fileID: 9142502057681387513}
   - component: {fileID: 7075349905077366022}
   - component: {fileID: 4565432893874914914}
+  - component: {fileID: 9193328109300355337}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -187,25 +187,6 @@ MonoBehaviour:
   invincibilityDuration: 1.5
   flashRate: 10
   flashMinAlpha: 0.15
---- !u!114 &9142502057681387513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3807682271332549976}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a1a70f2a8bd8650b8527618caece529, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHUD
-  healthFill: {fileID: 0}
-  healthText: {fileID: 0}
-  shieldFill: {fileID: 0}
-  shieldText: {fileID: 0}
-  playerHealth: {fileID: 0}
-  shieldBrokenColor: {r: 0.12, g: 0.18, b: 0.35, a: 1}
-  shieldActiveColor: {r: 0.19, g: 0.44, b: 0.78, a: 1}
 --- !u!50 &7075349905077366022
 Rigidbody2D:
   serializedVersion: 5
@@ -315,6 +296,24 @@ PolygonCollider2D:
       - {x: 1.9375, y: -1.875}
       - {x: 1.9375, y: -1.6875}
   m_UseDelaunayMesh: 1
+--- !u!114 &9193328109300355337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3807682271332549976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c13b34a8e1a965d30be2cf91ffc77c4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponController
+  slot1: {fileID: 11400000, guid: 7723b9ad801d79d0f83e079c9f31bca1, type: 2}
+  slot2: {fileID: 11400000, guid: d3ec8b7267fd7cc88910c55df8757c2f, type: 2}
+  slot3: {fileID: 11400000, guid: 9d0a6ec806139881b99cd1c222eabf58, type: 2}
+  slot4: {fileID: 11400000, guid: 4865b4a2c7e1368049802d414e1ef74c, type: 2}
+  weaponHUD: {fileID: 0}
+  fireKey: 32
 --- !u!1 &6238113145333379007
 GameObject:
   m_ObjectHideFlags: 0
