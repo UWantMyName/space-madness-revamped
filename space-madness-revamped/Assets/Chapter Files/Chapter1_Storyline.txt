@@ -17,7 +17,7 @@ COMMAND: Roger that. Proceed your course to Earth.
 
     // Formation 1 — 6 units gliding across from left to right
     [GROUP | count: 6 | batch_size: 6 | delay_first: 0.5 | delay_between: 0.0]
-        ALIEN | type: FastAlien | health: 2
+        ALIEN | type: FastAlien | health: 10
         PATH
             SPAWN | edge: left | position: 0.75
             [SEG | type: linear | angle: 0    | distance: 0.2  | speed: 4]
@@ -28,7 +28,7 @@ COMMAND: Roger that. Proceed your course to Earth.
 
     // Formation 2 — 6 units mirrored from the right
     [GROUP | count: 6 | batch_size: 6 | delay_first: 0.5 | delay_between: 0.0]
-        ALIEN | type: FastAlien | health: 2
+        ALIEN | type: FastAlien | health: 10
         PATH
             SPAWN | edge: right | position: 0.75
             [SEG | type: linear | angle: 180   | distance: 0.2  | speed: 4]
@@ -52,7 +52,7 @@ COMMAND: Acknowledged. Monitor them and engage if necessary.
 
     // Group 1 — 8 units approaching slowly down the centre
     [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 2.0]
-        ALIEN | type: FastAlien | health: 3
+        ALIEN | type: FastAlien | health: 12
         PATH
             SPAWN | edge: top | position: 0.5
             [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 3]
@@ -61,7 +61,7 @@ COMMAND: Acknowledged. Monitor them and engage if necessary.
 
     // Group 2 — 6 units creeping in from the left flank
     [GROUP | count: 6 | batch_size: 3 | delay_first: 1.0 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 3
+        ALIEN | type: FastAlien | health: 12
         PATH
             SPAWN | edge: top | position: 0.2
             [SEG | type: linear | angle: 270  | distance: 0.2 | speed: 3]
@@ -79,7 +79,7 @@ SYSTEM: Warning. Hostile activity detected!
 
     // Group 1 — 10 units diving fast down the middle
     [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 3
+        ALIEN | type: FastAlien | health: 12
         PATH
             SPAWN | edge: top | position: 0.5
             [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 6]
@@ -88,7 +88,7 @@ SYSTEM: Warning. Hostile activity detected!
 
     // Group 2 — 8 units diving from the left
     [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 3
+        ALIEN | type: FastAlien | health: 12
         PATH
             SPAWN | edge: top | position: 0.25
             [SEG | type: linear | angle: 270  | distance: 0.15 | speed: 6]
@@ -99,7 +99,7 @@ SYSTEM: Warning. Hostile activity detected!
 
     // Group 3 — 8 units diving from the right
     [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 3
+        ALIEN | type: FastAlien | health: 12
         PATH
             SPAWN | edge: top | position: 0.75
             [SEG | type: linear | angle: 270  | distance: 0.15 | speed: 6]
@@ -124,7 +124,7 @@ SYSTEM: Large signature count detected.
 
     // Group 1 — 12 units hammering straight down
     [GROUP | count: 12 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: top | position: 0.5
             [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 5]
@@ -133,7 +133,7 @@ SYSTEM: Large signature count detected.
 
     // Group 2 — 10 units sweeping in from the left in a wide arc
     [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 4
+        ALIEN | type: FastAlien | health: 16
         PATH
             SPAWN | edge: left | position: 0.8
             [SEG | type: linear | angle: 0    | distance: 0.15 | speed: 5]
@@ -144,7 +144,7 @@ SYSTEM: Large signature count detected.
 
     // Group 3 — 10 units sweeping in from the right
     [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 4
+        ALIEN | type: FastAlien | health: 16
         PATH
             SPAWN | edge: right | position: 0.8
             [SEG | type: linear | angle: 180   | distance: 0.15 | speed: 5]
@@ -199,7 +199,7 @@ SYSTEM: Large signature count detected.
 
     // Group 1 — 12 fast units pouring from the top in rapid batches
     [GROUP | count: 12 | batch_size: 3 | delay_first: 0.3 | delay_between: 0.8]
-        ALIEN | type: FastAlien | health: 4
+        ALIEN | type: FastAlien | health: 16
         PATH
             SPAWN | edge: top | position: 0.35
             [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 7]
@@ -208,7 +208,7 @@ SYSTEM: Large signature count detected.
 
     // Group 2 — 12 fast units from the other side
     [GROUP | count: 12 | batch_size: 3 | delay_first: 0.3 | delay_between: 0.8]
-        ALIEN | type: FastAlien | health: 4
+        ALIEN | type: FastAlien | health: 16
         PATH
             SPAWN | edge: top | position: 0.65
             [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 7]
@@ -230,7 +230,7 @@ PLAYER: Good to see you guys!
 
     // Group 1 — 15 units in tight formation down the centre
     [GROUP | count: 15 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: top | position: 0.5
             [SEG | type: linear | angle: 270 | distance: 0.4 | speed: 5]
@@ -239,7 +239,7 @@ PLAYER: Good to see you guys!
 
     // Group 2 — 10 units sweeping from the left
     [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: left | position: 0.7
             [SEG | type: linear | angle: 0    | distance: 0.1  | speed: 5]
@@ -268,7 +268,7 @@ PLAYER: Good to see you guys!
 
     // Group 2 — 8 flankers from the right
     [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: right | position: 0.6
             [SEG | type: linear | angle: 180   | distance: 0.1  | speed: 5]
@@ -290,7 +290,7 @@ DIDYMOS: Uhm, command, I'm reading power fluctuations in my ship.
 
     // Group 1 — 12 units pressing in while Didymos struggles
     [GROUP | count: 12 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: top | position: 0.45
             [SEG | type: linear | angle: 270 | distance: 0.45 | speed: 5]
@@ -299,7 +299,7 @@ DIDYMOS: Uhm, command, I'm reading power fluctuations in my ship.
 
     // Group 2 — 10 units from the right flank
     [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: top | position: 0.8
             [SEG | type: linear | angle: 270  | distance: 0.15 | speed: 5]
@@ -323,7 +323,7 @@ SYSTEM: Ally signal lost!
 [LEVEL_START | delay_between_waves: 2.5]
 
     [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 4
+        ALIEN | type: FastAlien | health: 16
         PATH
             SPAWN | edge: top | position: 0.4
             [SEG | type: linear | angle: 270 | distance: 0.45 | speed: 5]
@@ -331,7 +331,7 @@ SYSTEM: Ally signal lost!
     GROUP_END
 
     [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 4
+        ALIEN | type: FastAlien | health: 16
         PATH
             SPAWN | edge: top | position: 0.6
             [SEG | type: linear | angle: 270 | distance: 0.45 | speed: 5]
@@ -351,7 +351,7 @@ CERES: That wasn't an accident. His systems were hacked.
 
     // Group 1 — 12 units in aggressive straight dive
     [GROUP | count: 12 | batch_size: 4 | delay_first: 0.3 | delay_between: 1.0]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: top | position: 0.5
             [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 6]
@@ -360,7 +360,7 @@ CERES: That wasn't an accident. His systems were hacked.
 
     // Group 2 — 10 units flanking hard from the left
     [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: left | position: 0.65
             [SEG | type: linear | angle: 0    | distance: 0.15 | speed: 6]
@@ -371,7 +371,7 @@ CERES: That wasn't an accident. His systems were hacked.
 
     // Group 3 — 8 units flanking from the right
     [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
-        ALIEN | type: FastAlien | health: 5
+        ALIEN | type: FastAlien | health: 20
         PATH
             SPAWN | edge: right | position: 0.65
             [SEG | type: linear | angle: 180   | distance: 0.15 | speed: 6]
@@ -420,7 +420,7 @@ ENEMY UNIT: Specimen secured. Prepare system jump.
 
     // Group 1 — 20 escorts pouring in fast from all angles
     [GROUP | count: 20 | batch_size: 5 | delay_first: 0.3 | delay_between: 1.0]
-        ALIEN | type: FastAlien | health: 4
+        ALIEN | type: FastAlien | health: 16
         PATH
             SPAWN | edge: top | position: 0.5
             [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 7]

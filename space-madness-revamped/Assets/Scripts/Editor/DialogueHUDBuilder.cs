@@ -3,9 +3,16 @@
 //  Place this file inside any folder named "Editor" in your project.
 //  Menu: Tools → Build Dialogue HUD
 //
-//  Requirements:
-//    - TextMeshPro package installed (Window > Package Manager)
-//    - Run from an open scene where you want the Canvas created
+//  Layout:
+//    Upper-middle  — Dialogue box (compact, leaves sides free)
+//    Upper-right   — Score + Health bar + Shield bar (thin)
+//    Bottom-centre — Weapon panel (small slots) + Hex display (shown on switch)
+//    Lower-right   — Power-up with dual-layer cooldown fill
+//
+//  Auto-assigns after building:
+//    DialogueSystem        → all DialogueBox references
+//    PlayerHUD             → health/shield fill + text references
+//    WeaponHUDController   → slot and hex references
 // ============================================================
 
 #if UNITY_EDITOR
@@ -13,50 +20,70 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEditor;
 using TMPro;
-using System.IO;
 
 public static class DialogueHUDBuilder
 {
-    // ── Colors ───────────────────────────────────────────────
-    static readonly Color C_BG_DEEP     = Hex("#080F18");
-    static readonly Color C_BG_MID      = Hex("#0D1A28");
-    static readonly Color C_BORDER_DIM  = Hex("#1E3A5F");
-    static readonly Color C_BORDER_ACT  = Hex("#2A6EA6");
-    static readonly Color C_ACCENT      = Hex("#4EB8E8");
-    static readonly Color C_TEXT_BODY   = Hex("#A8C8E0");
-    static readonly Color C_HEALTH      = Hex("#C83030");
-    static readonly Color C_HEALTH_BG   = Hex("#1A0808");
-    static readonly Color C_SHIELD      = Hex("#3070C8");
-    static readonly Color C_SHIELD_BG   = Hex("#08101A");
-    static readonly Color C_THREAT      = Hex("#E84040");
-    static readonly Color C_LABEL_DIM   = Hex("#2A4A6A");
-    static readonly Color C_EMPTY       = Hex("#1E3A5F");
+    // ── Palette ──────────────────────────────────────────────
+    static readonly Color C_BG_DEEP    = Hex("#080F18");
+    static readonly Color C_BG_MID     = Hex("#0D1A28");
+    static readonly Color C_BORDER_DIM = Hex("#1E3A5F");
+    static readonly Color C_BORDER_ACT = Hex("#2A6EA6");
+    static readonly Color C_ACCENT     = Hex("#4EB8E8");
+    static readonly Color C_TEXT_BODY  = Hex("#A8C8E0");
+    static readonly Color C_HEALTH     = Hex("#C83030");
+    static readonly Color C_HEALTH_BG  = Hex("#1A0808");
+    static readonly Color C_SHIELD     = Hex("#3070C8");
+    static readonly Color C_SHIELD_BG  = Hex("#08101A");
+    static readonly Color C_SCORE      = Hex("#E8C84E");
+    static readonly Color C_LABEL_DIM  = Hex("#2A4A6A");
+    static readonly Color C_EMPTY      = Hex("#1E3A5F");
+    static readonly Color C_POWERUP    = Hex("#48E8A0");
+
+    // ── References collected during build for auto-assignment ─
+    static TextMeshProUGUI _actorNameTMP;
+    static Image           _actorIconImg;
+    static TextMeshProUGUI _dialogueTextTMP;
+    static RectTransform   _cursorRT;
+    static Image           _timerBarFillImg;
+    static GameObject      _continuePromptGO;
+    static GameObject      _dialogueBoxGO;
+
+    static Image           _healthFillImg;
+    static TextMeshProUGUI _healthValueTMP;
+    static Image           _shieldFillImg;
+    static TextMeshProUGUI _shieldValueTMP;
+
+    static GameObject[]    _weaponSlotGOs = new GameObject[4];
+    static GameObject      _hexDisplayGO;
+    static Image           _hexWeaponIconImg;
+    static TextMeshProUGUI _hexWeaponNameTMP;
+
+    static Image           _powerupFillImg;
 
     // ── Entry point ──────────────────────────────────────────
     [MenuItem("Tools/Build Dialogue HUD")]
     public static void Build()
     {
-        // Prevent duplicates
-        var existing = GameObject.Find("Canvas [DialogueHUD]");
+        var existing = GameObject.Find("Canvas [HUD]");
         if (existing != null)
         {
             bool replace = EditorUtility.DisplayDialog(
                 "Canvas already exists",
-                "A 'Canvas [DialogueHUD]' already exists in the scene. Replace it?",
+                "A 'Canvas [HUD]' already exists. Replace it?",
                 "Replace", "Cancel");
             if (!replace) return;
             Undo.DestroyObjectImmediate(existing);
         }
 
-        // ── Canvas ───────────────────────────────────────────
-        var canvasGO = new GameObject("Canvas [DialogueHUD]");
-        Undo.RegisterCreatedObjectUndo(canvasGO, "Build Dialogue HUD");
+        // ── Canvas ────────────────────────────────────────────
+        var canvasGO = new GameObject("Canvas [HUD]");
+        Undo.RegisterCreatedObjectUndo(canvasGO, "Build HUD");
 
-        var canvas = canvasGO.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        var canvas          = canvasGO.AddComponent<Canvas>();
+        canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 0;
 
-        var scaler = canvasGO.AddComponent<CanvasScaler>();
+        var scaler                 = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
         scaler.screenMatchMode     = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
@@ -64,7 +91,6 @@ public static class DialogueHUDBuilder
 
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        // ── EventSystem (create if missing) ──────────────────
         if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
         {
             var esGO = new GameObject("EventSystem");
@@ -72,471 +98,493 @@ public static class DialogueHUDBuilder
             esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
         }
 
-        // ── HUD (always active) ───────────────────────────────
+        // ── HUD root ──────────────────────────────────────────
         var hud = MakeGO("HUD", canvasGO.transform);
         StretchFull(hud);
 
-        BuildBottomBar(hud.transform);
-        BuildSectorIndicator(hud.transform);   // top-right of screen, separate from dialogue
+        BuildDialogueBox(hud.transform);
+        BuildStatsPanel(hud.transform);
+        BuildWeaponPanel(hud.transform);
+        BuildPowerupPanel(hud.transform);
 
-        // ── DialogueLayer (starts inactive) ──────────────────
-        var dlgLayer = MakeGO("DialogueLayer", canvasGO.transform);
-        StretchFull(dlgLayer);
-        BuildDialogueBox(dlgLayer.transform);
-        dlgLayer.SetActive(false);
+        // ── Auto-assign scripts ───────────────────────────────
+        AssignDialogueSystem(_dialogueBoxGO);
+        AssignPlayerHUD(hud);
+        AssignWeaponHUDController(hud);
 
-        // ── Loadout Prefab ────────────────────────────────────
         EnsurePrefabFolder();
-        BuildLoadoutSlotPrefab();
 
-        Debug.Log("<color=#4EB8E8>[DialogueHUDBuilder] Canvas built successfully.</color>\n" +
-                  "• Assign your font to all TMP components (marked with 'TODO: assign font').\n" +
-                  "• Assign weapon sprites to LoadoutSlot prefabs.\n" +
-                  "• Attach DialogueSystem.cs to the DialogueBox GameObject.");
+        Debug.Log("<color=#4EB8E8>[DialogueHUDBuilder] HUD built and scripts assigned.</color>\n" +
+                  "Remaining manual steps:\n" +
+                  "• Assign your TMP font to all text components.\n" +
+                  "• Assign weapon sprites to each WeaponSlot/WeaponIcon and HexDisplay/WeaponIcon.\n" +
+                  "• Assign power-up sprite to PowerupPanel/IconArea/PowerupIcon_Dim and PowerupIcon_Fill.\n" +
+                  "• Assign a hexagonal sprite to WeaponHexDisplay/HexBG (optional, cosmetic).\n" +
+                  "• Drag the Player GameObject into PlayerHUD.PlayerHealth in the Inspector.");
 
         Selection.activeGameObject = canvasGO;
     }
 
     // ══════════════════════════════════════════════════════════
-    //  DIALOGUE BOX
+    //  DIALOGUE BOX  (upper-middle, compact)
     // ══════════════════════════════════════════════════════════
     static void BuildDialogueBox(Transform parent)
     {
-        // Container
-        var box = MakeGO("DialogueBox", parent);
-        var rt  = box.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0, 1);
-        rt.anchorMax = new Vector2(1, 1);
-        rt.pivot     = new Vector2(0.5f, 1f);
-        rt.offsetMin = new Vector2(0, -160);
-        rt.offsetMax = Vector2.zero;
+        _dialogueBoxGO = MakeGO("DialogueBox", parent);
+        var rt         = _dialogueBoxGO.GetComponent<RectTransform>();
+        // 50 % of the screen width, anchored to the top-centre
+        rt.anchorMin        = new Vector2(0.25f, 1f);
+        rt.anchorMax        = new Vector2(0.75f, 1f);
+        rt.pivot            = new Vector2(0.5f, 1f);
+        rt.offsetMin        = new Vector2(0f, -136f);
+        rt.offsetMax        = Vector2.zero;
 
-        AddImage(box, C_BG_DEEP);
+        var bgImg   = AddImage(_dialogueBoxGO, C_BG_DEEP);
+        bgImg.color = Alpha(C_BG_DEEP, 0.93f);
 
         // Bottom border line
-        var border = MakeGO("BottomBorder", box.transform);
+        var border = MakeGO("BottomBorder", _dialogueBoxGO.transform);
         var brt    = border.GetComponent<RectTransform>();
-        brt.anchorMin = new Vector2(0, 0);
-        brt.anchorMax = new Vector2(1, 0);
-        brt.pivot     = new Vector2(0.5f, 0f);
-        brt.sizeDelta = new Vector2(0, 1);
+        brt.anchorMin        = new Vector2(0f, 0f);
+        brt.anchorMax        = new Vector2(1f, 0f);
+        brt.pivot            = new Vector2(0.5f, 0f);
+        brt.sizeDelta        = new Vector2(0f, 1f);
         brt.anchoredPosition = Vector2.zero;
         AddImage(border, C_BORDER_DIM);
 
-        // Actor Icon
-        var icon = MakeGO("ActorIcon", box.transform);
-        var irt  = icon.GetComponent<RectTransform>();
-        irt.anchorMin        = new Vector2(0, 0.5f);
-        irt.anchorMax        = new Vector2(0, 0.5f);
-        irt.pivot            = new Vector2(0, 0.5f);
-        irt.sizeDelta        = new Vector2(64, 64);
-        irt.anchoredPosition = new Vector2(16, 0);
-        var iconImg          = AddImage(icon, C_BG_MID);
-        iconImg.preserveAspect = true;
+        // Actor icon
+        var iconGO = MakeGO("ActorIcon", _dialogueBoxGO.transform);
+        var irt    = iconGO.GetComponent<RectTransform>();
+        irt.anchorMin        = new Vector2(0f, 0.5f);
+        irt.anchorMax        = new Vector2(0f, 0.5f);
+        irt.pivot            = new Vector2(0f, 0.5f);
+        irt.sizeDelta        = new Vector2(56f, 56f);
+        irt.anchoredPosition = new Vector2(12f, 0f);
+        _actorIconImg              = AddImage(iconGO, C_BG_MID);
+        _actorIconImg.preserveAspect = true;
 
-        // Icon border child
-        var iconBorder = MakeGO("IconBorder", icon.transform);
-        StretchFull(iconBorder);
-        var ibImg = AddImage(iconBorder, Color.clear);
-        // Outline effect via a thin child panel — simple approach
-        iconBorder.GetComponent<Image>().color = C_BORDER_ACT;
-        var ibOutline = iconBorder.AddComponent<Outline>();
-        ibOutline.effectColor    = C_BORDER_ACT;
-        ibOutline.effectDistance = new Vector2(1, -1);
-
-        // Actor Name
-        var nameGO = MakeGO("ActorName", box.transform);
+        // Actor name
+        var nameGO = MakeGO("ActorName", _dialogueBoxGO.transform);
         var nrt    = nameGO.GetComponent<RectTransform>();
-        nrt.anchorMin        = new Vector2(0, 1);
-        nrt.anchorMax        = new Vector2(0, 1);
-        nrt.pivot            = new Vector2(0, 1);
-        nrt.sizeDelta        = new Vector2(400, 40);
-        nrt.anchoredPosition = new Vector2(96, -10);
-        var nameTMP          = AddTMP(nameGO, "COMMANDER ZRIX", 32, C_ACCENT, FontStyles.Bold);
-        nameTMP.characterSpacing = 4f;
+        nrt.anchorMin        = new Vector2(0f, 1f);
+        nrt.anchorMax        = new Vector2(0f, 1f);
+        nrt.pivot            = new Vector2(0f, 1f);
+        nrt.sizeDelta        = new Vector2(340f, 32f);
+        nrt.anchoredPosition = new Vector2(80f, -8f);
+        _actorNameTMP              = AddTMP(nameGO, "COMMAND", 24f, C_ACCENT, FontStyles.Bold);
+        _actorNameTMP.characterSpacing = 4f;
 
-        // Dialogue Text
-        var textGO = MakeGO("DialogueText", box.transform);
+        // Dialogue text
+        var textGO = MakeGO("DialogueText", _dialogueBoxGO.transform);
         var trt    = textGO.GetComponent<RectTransform>();
-        trt.anchorMin = new Vector2(0, 1);
-        trt.anchorMax = new Vector2(1, 1);
-        trt.pivot     = new Vector2(0, 1);
-        trt.offsetMin = new Vector2(96, -148);
-        trt.offsetMax = new Vector2(-220, -48);
-        var textTMP   = AddTMP(textGO, "", 30, C_TEXT_BODY, FontStyles.Normal);
-        textTMP.enableWordWrapping    = true;
-        textTMP.lineSpacing           = 6f;
-        textTMP.overflowMode          = TextOverflowModes.Overflow;
+        trt.anchorMin = new Vector2(0f, 1f);
+        trt.anchorMax = new Vector2(1f, 1f);
+        trt.pivot     = new Vector2(0f, 1f);
+        trt.offsetMin = new Vector2(80f, -128f);
+        trt.offsetMax = new Vector2(-148f, -42f);
+        _dialogueTextTMP                     = AddTMP(textGO, "", 22f, C_TEXT_BODY, FontStyles.Normal);
+        _dialogueTextTMP.enableWordWrapping  = true;
+        _dialogueTextTMP.overflowMode        = TextOverflowModes.Overflow;
+        _dialogueTextTMP.lineSpacing         = 5f;
 
-        // Cursor (blinking block, child of DialogueText)
-        var cursor = MakeGO("Cursor", textGO.transform);
-        var crt    = cursor.GetComponent<RectTransform>();
-        crt.anchorMin = new Vector2(0, 0);
-        crt.anchorMax = new Vector2(0, 0);
-        crt.pivot     = new Vector2(0, 0);
-        crt.sizeDelta = new Vector2(8, 13);
-        AddImage(cursor, C_ACCENT);
-        // Note: DialogueSystem.cs will position and toggle this at runtime
+        // Cursor (child of DialogueText)
+        var cursorGO = MakeGO("Cursor", textGO.transform);
+        _cursorRT    = cursorGO.GetComponent<RectTransform>();
+        _cursorRT.anchorMin = Vector2.zero;
+        _cursorRT.anchorMax = Vector2.zero;
+        _cursorRT.pivot     = Vector2.zero;
+        _cursorRT.sizeDelta = new Vector2(7f, 11f);
+        AddImage(cursorGO, C_ACCENT);
 
-        // Timer Bar background
-        var timerBG = MakeGO("TimerBar", box.transform);
+        // Timer bar BG
+        var timerBG = MakeGO("TimerBar", _dialogueBoxGO.transform);
         var tbrt    = timerBG.GetComponent<RectTransform>();
-        tbrt.anchorMin = new Vector2(0, 0);
-        tbrt.anchorMax = new Vector2(1, 0);
-        tbrt.pivot     = new Vector2(0.5f, 0f);
-        tbrt.sizeDelta = new Vector2(0, 2);
+        tbrt.anchorMin        = new Vector2(0f, 0f);
+        tbrt.anchorMax        = new Vector2(1f, 0f);
+        tbrt.pivot            = new Vector2(0.5f, 0f);
+        tbrt.sizeDelta        = new Vector2(0f, 2f);
         tbrt.anchoredPosition = Vector2.zero;
         AddImage(timerBG, C_BORDER_DIM);
 
-        // Timer Bar fill
-        var timerFill = MakeGO("TimerBarFill", timerBG.transform);
+        // Timer bar fill
+        var timerFill  = MakeGO("TimerBarFill", timerBG.transform);
+        var tfRt       = timerFill.GetComponent<RectTransform>();
+        tfRt.pivot     = new Vector2(0f, 0.5f);
         StretchFull(timerFill);
-        var tfImg = AddImage(timerFill, C_ACCENT);
-        tfImg.type       = Image.Type.Filled;
-        tfImg.fillMethod = Image.FillMethod.Horizontal;
-        tfImg.fillOrigin = (int)Image.OriginHorizontal.Left;
-        tfImg.fillAmount = 1f;
+        _timerBarFillImg            = AddImage(timerFill, C_ACCENT);
+        _timerBarFillImg.type       = Image.Type.Filled;
+        _timerBarFillImg.fillMethod = Image.FillMethod.Horizontal;
+        _timerBarFillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
+        _timerBarFillImg.fillAmount = 1f;
 
-        // Continue Prompt
-        var continueGO = MakeGO("ContinuePrompt", box.transform);
-        var cprt       = continueGO.GetComponent<RectTransform>();
-        cprt.anchorMin        = new Vector2(1, 0);
-        cprt.anchorMax        = new Vector2(1, 0);
-        cprt.pivot            = new Vector2(1, 0);
-        cprt.sizeDelta        = new Vector2(200, 30);
-        cprt.anchoredPosition = new Vector2(-16, 8);
-        var cpTMP             = AddTMP(continueGO, "CONTINUE ▼", 25, C_ACCENT, FontStyles.Normal);
+        // Continue prompt
+        _continuePromptGO  = MakeGO("ContinuePrompt", _dialogueBoxGO.transform);
+        var cprt           = _continuePromptGO.GetComponent<RectTransform>();
+        cprt.anchorMin        = new Vector2(1f, 0f);
+        cprt.anchorMax        = new Vector2(1f, 0f);
+        cprt.pivot            = new Vector2(1f, 0f);
+        cprt.sizeDelta        = new Vector2(152f, 26f);
+        cprt.anchoredPosition = new Vector2(-12f, 6f);
+        var cpTMP             = AddTMP(_continuePromptGO, "CONTINUE ▼", 19f, C_ACCENT, FontStyles.Normal);
         cpTMP.alignment       = TextAlignmentOptions.Right;
-        cpTMP.characterSpacing = 3f;
-        var cpColor           = cpTMP.color;
-        cpColor.a             = 0.7f;
-        cpTMP.color           = cpColor;
+        cpTMP.color           = Alpha(C_ACCENT, 0.7f);
     }
 
     // ══════════════════════════════════════════════════════════
-    //  SECTOR INDICATOR  (top-right, inside HUD)
+    //  BARS PANEL   (upper-left  — health + shield)
+    //  SCORE PANEL  (upper-right — score only)
     // ══════════════════════════════════════════════════════════
-    static void BuildSectorIndicator(Transform parent)
-    {
-        var si  = MakeGO("SectorIndicator", parent);
-        var rt  = si.GetComponent<RectTransform>();
-        rt.anchorMin        = new Vector2(1, 1);
-        rt.anchorMax        = new Vector2(1, 1);
-        rt.pivot            = new Vector2(1, 1);
-        rt.sizeDelta        = new Vector2(160, 40);
-        rt.anchoredPosition = new Vector2(-16, -10);
-
-        var vlg = si.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing           = 2;
-        vlg.childAlignment    = TextAnchor.UpperRight;
-        vlg.childControlWidth = true;
-        vlg.childControlHeight= false;
-        vlg.childForceExpandWidth  = true;
-        vlg.childForceExpandHeight = false;
-
-        // Sector label
-        var sectorGO  = MakeGO("SectorLabel", si.transform);
-        sectorGO.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 18);
-        var sectorTMP = AddTMP(sectorGO, "SECTOR 7", 10, C_ACCENT, FontStyles.Normal);
-        sectorTMP.alignment       = TextAlignmentOptions.Right;
-        sectorTMP.characterSpacing = 4f;
-
-        // Threat label
-        var threatGO  = MakeGO("ThreatLabel", si.transform);
-        threatGO.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 18);
-        var threatTMP = AddTMP(threatGO, "● HOSTILE", 10, C_THREAT, FontStyles.Bold);
-        threatTMP.alignment       = TextAlignmentOptions.Right;
-        threatTMP.characterSpacing = 3f;
-    }
-
-    // ══════════════════════════════════════════════════════════
-    //  BOTTOM BAR
-    // ══════════════════════════════════════════════════════════
-    static void BuildBottomBar(Transform parent)
-    {
-        var bar = MakeGO("BottomBar", parent);
-        var rt  = bar.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0, 0);
-        rt.anchorMax = new Vector2(1, 0);
-        rt.pivot     = new Vector2(0.5f, 0f);
-        rt.sizeDelta = new Vector2(0, 160);
-        rt.anchoredPosition = Vector2.zero;
-        AddImage(bar, C_BG_DEEP);
-
-        // Top border
-        var topBorder = MakeGO("TopBorder", bar.transform);
-        var tbrt      = topBorder.GetComponent<RectTransform>();
-        tbrt.anchorMin = new Vector2(0, 1);
-        tbrt.anchorMax = new Vector2(1, 1);
-        tbrt.pivot     = new Vector2(0.5f, 1f);
-        tbrt.sizeDelta = new Vector2(0, 1);
-        tbrt.anchoredPosition = Vector2.zero;
-        AddImage(topBorder, C_BORDER_DIM);
-
-        BuildStatsPanel(bar.transform);
-        BuildLoadoutPanel(bar.transform);
-        BuildScavengedPanel(bar.transform);
-    }
-
-    // ── Stats Panel ──────────────────────────────────────────
     static void BuildStatsPanel(Transform parent)
     {
-        var panel = MakeGO("StatsPanel", parent);
-        var rt    = panel.GetComponent<RectTransform>();
-        rt.anchorMin        = new Vector2(0, 0);
-        rt.anchorMax        = new Vector2(0, 1);
-        rt.pivot            = new Vector2(0, 0.5f);
-        rt.sizeDelta        = new Vector2(520, 0);
-        rt.anchoredPosition = new Vector2(16, 0);
+        // ── Health + Shield — upper-left ──────────────────────
+        var barsPanel = MakeGO("BarsPanel", parent);
+        var brt       = barsPanel.GetComponent<RectTransform>();
+        brt.anchorMin        = new Vector2(0f, 1f);
+        brt.anchorMax        = new Vector2(0f, 1f);
+        brt.pivot            = new Vector2(0f, 1f);
+        brt.sizeDelta        = new Vector2(260f, 72f);
+        brt.anchoredPosition = new Vector2(14f, -12f);
 
-        var vlg = panel.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing              = 16;
-        vlg.childAlignment       = TextAnchor.MiddleLeft;
-        vlg.childControlWidth    = true;
-        vlg.childControlHeight   = false;
-        vlg.childForceExpandWidth  = true;
-        vlg.childForceExpandHeight = false;
-        vlg.padding = new RectOffset(0, 0, 22, 22);
+        var barsVlg = barsPanel.AddComponent<VerticalLayoutGroup>();
+        barsVlg.spacing                = 5f;
+        barsVlg.childAlignment         = TextAnchor.UpperLeft;
+        barsVlg.childControlWidth      = true;
+        barsVlg.childControlHeight     = false;
+        barsVlg.childForceExpandWidth  = true;
+        barsVlg.childForceExpandHeight = false;
 
-        BuildStatRow(panel.transform, "HealthRow",  "+",  C_HEALTH,  C_HEALTH_BG,  "138 / 138", C_HEALTH);
-        BuildStatRow(panel.transform, "ShieldRow",  "◆",  C_SHIELD,  C_SHIELD_BG,  "30 / 30",   C_SHIELD);
+        (_healthFillImg, _healthValueTMP) = BuildThinBar(
+            barsPanel.transform, "HealthRow", "HP", C_HEALTH, C_HEALTH_BG);
+        (_shieldFillImg, _shieldValueTMP) = BuildThinBar(
+            barsPanel.transform, "ShieldRow", "SH", C_SHIELD, C_SHIELD_BG);
+
+        // ── Score — upper-right ───────────────────────────────
+        var scorePanel = MakeGO("ScorePanel", parent);
+        var srt        = scorePanel.GetComponent<RectTransform>();
+        srt.anchorMin        = new Vector2(1f, 1f);
+        srt.anchorMax        = new Vector2(1f, 1f);
+        srt.pivot            = new Vector2(1f, 1f);
+        srt.sizeDelta        = new Vector2(230f, 30f);
+        srt.anchoredPosition = new Vector2(-14f, -12f);
+
+        var sHlg = scorePanel.AddComponent<HorizontalLayoutGroup>();
+        sHlg.childAlignment        = TextAnchor.MiddleRight;
+        sHlg.childControlWidth     = false;
+        sHlg.childControlHeight    = false;
+        sHlg.childForceExpandWidth = false;
+        sHlg.spacing               = 6f;
+
+        var scoreLabelGO = MakeGO("ScoreLabel", scorePanel.transform);
+        scoreLabelGO.GetComponent<RectTransform>().sizeDelta = new Vector2(70f, 26f);
+        var slTMP = AddTMP(scoreLabelGO, "SCORE", 15f, C_LABEL_DIM, FontStyles.Normal);
+        slTMP.alignment        = TextAlignmentOptions.Right;
+        slTMP.characterSpacing = 3f;
+
+        var scoreValueGO = MakeGO("ScoreValue", scorePanel.transform);
+        scoreValueGO.GetComponent<RectTransform>().sizeDelta = new Vector2(164f, 26f);
+        var svTMP = AddTMP(scoreValueGO, "000000", 28f, C_SCORE, FontStyles.Bold);
+        svTMP.alignment        = TextAlignmentOptions.Right;
+        svTMP.characterSpacing = 2f;
     }
 
-    static void BuildStatRow(Transform parent, string name, string icon,
-                              Color barColor, Color bgColor, string valText, Color textColor)
+    static (Image fill, TextMeshProUGUI value) BuildThinBar(
+        Transform parent, string rowName, string labelStr, Color barColor, Color bgColor)
     {
-        var row = MakeGO(name, parent);
-        var rt  = row.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(0, 36);
+        var row = MakeGO(rowName, parent);
+        row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 26f);
 
         var hlg = row.AddComponent<HorizontalLayoutGroup>();
-        hlg.spacing              = 6;
-        hlg.childAlignment       = TextAnchor.MiddleLeft;
-        hlg.childControlWidth    = false;
-        hlg.childControlHeight   = false;
+        hlg.spacing                = 5f;
+        hlg.childAlignment         = TextAnchor.MiddleRight;
+        hlg.childControlWidth      = false;
+        hlg.childControlHeight     = false;
         hlg.childForceExpandWidth  = false;
-        hlg.childForceExpandHeight = false;
 
-        // Icon
-        var iconGO = MakeGO("Icon", row.transform);
-        iconGO.GetComponent<RectTransform>().sizeDelta = new Vector2(26, 26);
-        var iconTMP = AddTMP(iconGO, icon, 20, barColor, FontStyles.Bold);
-        iconTMP.alignment = TextAlignmentOptions.Center;
+        var labelGO = MakeGO("Label", row.transform);
+        labelGO.GetComponent<RectTransform>().sizeDelta = new Vector2(28f, 20f);
+        var lTMP = AddTMP(labelGO, labelStr, 15f, Alpha(barColor, 0.55f), FontStyles.Normal);
+        lTMP.alignment        = TextAlignmentOptions.Right;
+        lTMP.characterSpacing = 1f;
 
-        // Bar background
         var barBG = MakeGO("BarBG", row.transform);
-        barBG.GetComponent<RectTransform>().sizeDelta = new Vector2(400, 30);
+        barBG.GetComponent<RectTransform>().sizeDelta = new Vector2(140f, 10f);
         AddImage(barBG, bgColor);
 
-        // Bar fill
-        // Pivot is set to the left edge (0, 0.5) so that localScale.x shrinks the bar
-        // from right to left, which is what PlayerHUD uses to drive both plain and Filled images.
         var fill   = MakeGO("Fill", barBG.transform);
         StretchFull(fill);
-        var fillRt        = fill.GetComponent<RectTransform>();
-        fillRt.pivot      = new Vector2(0f, 0.5f);
-        var fillImg       = AddImage(fill, barColor);
-        fillImg.type       = Image.Type.Filled;
-        fillImg.fillMethod = Image.FillMethod.Horizontal;
-        fillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
-        fillImg.fillAmount = 1f;
+        var fillRt   = fill.GetComponent<RectTransform>();
+        fillRt.pivot = new Vector2(0f, 0.5f);
+        var fillImg         = AddImage(fill, barColor);
+        fillImg.type        = Image.Type.Filled;
+        fillImg.fillMethod  = Image.FillMethod.Horizontal;
+        fillImg.fillOrigin  = (int)Image.OriginHorizontal.Left;
+        fillImg.fillAmount  = 1f;
 
-        // Value text
         var valGO = MakeGO("ValueText", row.transform);
-        valGO.GetComponent<RectTransform>().sizeDelta = new Vector2(90, 26);
-        var valTMP = AddTMP(valGO, valText, 18, textColor, FontStyles.Normal);
+        valGO.GetComponent<RectTransform>().sizeDelta = new Vector2(70f, 20f);
+        var valTMP = AddTMP(valGO, "---", 17f, barColor, FontStyles.Normal);
         valTMP.alignment = TextAlignmentOptions.Right;
+
+        return (fillImg, valTMP);
     }
 
-    // ── Loadout Panel ────────────────────────────────────────
-    static void BuildLoadoutPanel(Transform parent)
+    // ══════════════════════════════════════════════════════════
+    //  WEAPON PANEL  (bottom-centre)
+    //
+    //  SmallSlotsContainer  — 4 compact slots, always visible
+    //  WeaponHexDisplay     — large hex, revealed on weapon switch
+    // ══════════════════════════════════════════════════════════
+    static void BuildWeaponPanel(Transform parent)
     {
-        var panel = MakeGO("LoadoutPanel", parent);
+        var panel = MakeGO("WeaponPanel", parent);
         var rt    = panel.GetComponent<RectTransform>();
-        rt.anchorMin        = new Vector2(0.5f, 0);
-        rt.anchorMax        = new Vector2(0.5f, 1);
-        rt.pivot            = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta        = new Vector2(380, 0);
-        rt.anchoredPosition = Vector2.zero;
+        rt.anchorMin        = new Vector2(0.5f, 0f);
+        rt.anchorMax        = new Vector2(0.5f, 0f);
+        rt.pivot            = new Vector2(0.5f, 0f);
+        rt.sizeDelta        = new Vector2(368f, 90f);
+        rt.anchoredPosition = new Vector2(0f, 8f);
 
-        var hlg = panel.AddComponent<HorizontalLayoutGroup>();
-        hlg.spacing              = 6;
-        hlg.childAlignment       = TextAnchor.MiddleCenter;
-        hlg.childControlWidth    = false;
-        hlg.childControlHeight   = false;
+        // ── Small slots ───────────────────────────────────────
+        var slotsGO = MakeGO("SmallSlotsContainer", panel.transform);
+        StretchFull(slotsGO);
+
+        var hlg = slotsGO.AddComponent<HorizontalLayoutGroup>();
+        hlg.spacing                = 8f;
+        hlg.childAlignment         = TextAnchor.LowerCenter;
+        hlg.childControlWidth      = false;
+        hlg.childControlHeight     = false;
         hlg.childForceExpandWidth  = false;
-        hlg.childForceExpandHeight = false;
 
-        // Rotated "LOADOUT" label
-        var labelGO  = MakeGO("LoadoutLabel", panel.transform);
-        labelGO.GetComponent<RectTransform>().sizeDelta = new Vector2(14, 60);
-        var labelTMP = AddTMP(labelGO, "LOADOUT", 8, C_LABEL_DIM, FontStyles.Normal);
-        labelTMP.alignment       = TextAlignmentOptions.Center;
-        labelTMP.characterSpacing = 4f;
-        labelGO.transform.localRotation = Quaternion.Euler(0, 0, 90);
+        for (int i = 0; i < 4; i++)
+            _weaponSlotGOs[i] = BuildSmallWeaponSlot(slotsGO.transform, (i + 1).ToString(), i == 0);
 
-        // Separator
-        var sep = MakeGO("Separator", panel.transform);
-        sep.GetComponent<RectTransform>().sizeDelta = new Vector2(1, 50);
-        AddImage(sep, C_BORDER_DIM);
+        // ── Hex display (hidden by default) ───────────────────
+        _hexDisplayGO = MakeGO("WeaponHexDisplay", panel.transform);
+        var hexRt     = _hexDisplayGO.GetComponent<RectTransform>();
+        hexRt.anchorMin        = new Vector2(0.5f, 0f);
+        hexRt.anchorMax        = new Vector2(0.5f, 0f);
+        hexRt.pivot            = new Vector2(0.5f, 0f);
+        hexRt.sizeDelta        = new Vector2(136f, 128f);
+        hexRt.anchoredPosition = Vector2.zero;
 
-        // Slots
-        string[] slotNames   = { "Slot_Pulse",  "Slot_Spread", "Slot_Laser" };
-        string[] slotLabels  = { "PULSE [1]",   "SPREAD [2]",  "LASER [2]"  };
+        // Hex background (assign hex sprite in Inspector)
+        var hexBG    = MakeGO("HexBG", _hexDisplayGO.transform);
+        StretchFull(hexBG);
+        AddImage(hexBG, Alpha(C_BG_MID, 0.95f));
 
-        for (int i = 0; i < 3; i++)
-            BuildLoadoutSlotInline(panel.transform, slotNames[i], slotLabels[i], i == 0);
+        var hexBorder   = MakeGO("HexBorder", _hexDisplayGO.transform);
+        StretchFull(hexBorder);
+        AddImage(hexBorder, Color.clear);
+        var hexOutline         = hexBorder.AddComponent<Outline>();
+        hexOutline.effectColor    = C_BORDER_ACT;
+        hexOutline.effectDistance = new Vector2(2f, -2f);
+
+        // Weapon name (top)
+        var wnGO    = MakeGO("WeaponName", _hexDisplayGO.transform);
+        var wnRt    = wnGO.GetComponent<RectTransform>();
+        wnRt.anchorMin        = new Vector2(0f, 1f);
+        wnRt.anchorMax        = new Vector2(1f, 1f);
+        wnRt.pivot            = new Vector2(0.5f, 1f);
+        wnRt.sizeDelta        = new Vector2(0f, 26f);
+        wnRt.anchoredPosition = new Vector2(0f, -6f);
+        _hexWeaponNameTMP             = AddTMP(wnGO, "PULSE CANNON", 15f, C_ACCENT, FontStyles.Bold);
+        _hexWeaponNameTMP.alignment   = TextAlignmentOptions.Center;
+        _hexWeaponNameTMP.characterSpacing = 3f;
+
+        // Weapon icon (centre)
+        var wiGO    = MakeGO("WeaponIcon", _hexDisplayGO.transform);
+        var wiRt    = wiGO.GetComponent<RectTransform>();
+        wiRt.anchorMin        = new Vector2(0.5f, 0.5f);
+        wiRt.anchorMax        = new Vector2(0.5f, 0.5f);
+        wiRt.pivot            = new Vector2(0.5f, 0.5f);
+        wiRt.sizeDelta        = new Vector2(70f, 54f);
+        wiRt.anchoredPosition = new Vector2(0f, -6f);
+        _hexWeaponIconImg              = AddImage(wiGO, C_BORDER_ACT);
+        _hexWeaponIconImg.preserveAspect = true;
+
+        _hexDisplayGO.SetActive(false);
     }
 
-    static void BuildLoadoutSlotInline(Transform parent, string name, string label, bool active)
+    static GameObject BuildSmallWeaponSlot(Transform parent, string keyLabel, bool active)
     {
-        var slot = MakeGO(name, parent);
-        var rt   = slot.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(100, 100);
-
+        var slot = MakeGO($"WeaponSlot_{keyLabel}", parent);
+        slot.GetComponent<RectTransform>().sizeDelta = new Vector2(82f, 82f);
         slot.AddComponent<Button>();
-        var bg = AddImage(slot, C_BG_MID);
+        AddImage(slot, active ? C_BG_MID : Alpha(C_BG_MID, 0.55f));
 
-        // Border via Outline component
-        var outline = slot.AddComponent<Outline>();
+        var outline         = slot.AddComponent<Outline>();
         outline.effectColor    = active ? C_BORDER_ACT : C_BORDER_DIM;
-        outline.effectDistance = new Vector2(1, -1);
+        outline.effectDistance = new Vector2(1f, -1f);
 
-        // Weapon icon placeholder
-        var weaponGO = MakeGO("WeaponIcon", slot.transform);
-        var wrt      = weaponGO.GetComponent<RectTransform>();
-        wrt.anchorMin        = new Vector2(0.5f, 0.5f);
-        wrt.anchorMax        = new Vector2(0.5f, 0.5f);
-        wrt.pivot            = new Vector2(0.5f, 0.5f);
-        wrt.sizeDelta        = new Vector2(68, 48);
-        wrt.anchoredPosition = new Vector2(0, 10);
-        var wImg             = AddImage(weaponGO, active ? C_ACCENT : C_BORDER_DIM);
-        wImg.preserveAspect  = true;
+        // Weapon icon
+        var wGO = MakeGO("WeaponIcon", slot.transform);
+        var wRt = wGO.GetComponent<RectTransform>();
+        wRt.anchorMin        = new Vector2(0.5f, 0.5f);
+        wRt.anchorMax        = new Vector2(0.5f, 0.5f);
+        wRt.pivot            = new Vector2(0.5f, 0.5f);
+        wRt.sizeDelta        = new Vector2(52f, 38f);
+        wRt.anchoredPosition = new Vector2(0f, 6f);
+        AddImage(wGO, active ? C_ACCENT : C_BORDER_DIM).preserveAspect = true;
 
-        // Slot label
-        var labelGO  = MakeGO("SlotLabel", slot.transform);
-        var lrt      = labelGO.GetComponent<RectTransform>();
-        lrt.anchorMin        = new Vector2(0, 0);
-        lrt.anchorMax        = new Vector2(1, 0);
-        lrt.pivot            = new Vector2(0.5f, 0f);
-        lrt.sizeDelta        = new Vector2(0, 18);
-        lrt.anchoredPosition = new Vector2(0, 6);
-        var lTMP = AddTMP(labelGO, label, 13, active ? C_BORDER_ACT : C_EMPTY, FontStyles.Normal);
-        lTMP.alignment       = TextAlignmentOptions.Center;
+        // Key label
+        var lGO = MakeGO("KeyLabel", slot.transform);
+        var lRt = lGO.GetComponent<RectTransform>();
+        lRt.anchorMin        = new Vector2(0f, 0f);
+        lRt.anchorMax        = new Vector2(1f, 0f);
+        lRt.pivot            = new Vector2(0.5f, 0f);
+        lRt.sizeDelta        = new Vector2(0f, 15f);
+        lRt.anchoredPosition = new Vector2(0f, 4f);
+        var lTMP = AddTMP(lGO, $"[{keyLabel}]", 12f, active ? C_BORDER_ACT : C_EMPTY, FontStyles.Normal);
+        lTMP.alignment        = TextAlignmentOptions.Center;
         lTMP.characterSpacing = 2f;
 
-        // Active indicator dot
+        // Active dot
         var dot = MakeGO("ActiveIndicator", slot.transform);
-        var drt = dot.GetComponent<RectTransform>();
-        drt.anchorMin        = new Vector2(0.5f, 0);
-        drt.anchorMax        = new Vector2(0.5f, 0);
-        drt.pivot            = new Vector2(0.5f, 0f);
-        drt.sizeDelta        = new Vector2(4, 4);
-        drt.anchoredPosition = new Vector2(0, 1);
+        var dRt = dot.GetComponent<RectTransform>();
+        dRt.anchorMin        = new Vector2(0.5f, 0f);
+        dRt.anchorMax        = new Vector2(0.5f, 0f);
+        dRt.pivot            = new Vector2(0.5f, 0f);
+        dRt.sizeDelta        = new Vector2(4f, 4f);
+        dRt.anchoredPosition = new Vector2(0f, 1f);
         AddImage(dot, C_ACCENT);
         dot.SetActive(active);
+
+        return slot;
     }
 
-    // ── Scavenged Panel ──────────────────────────────────────
-    static void BuildScavengedPanel(Transform parent)
+    // ══════════════════════════════════════════════════════════
+    //  POWER-UP PANEL  (lower-right)
+    //
+    //  Two image layers:
+    //    PowerupIcon_Dim  — icon at half alpha (always shows)
+    //    PowerupIcon_Fill — same icon full alpha, fills bottom-to-top
+    // ══════════════════════════════════════════════════════════
+    static void BuildPowerupPanel(Transform parent)
     {
-        var panel = MakeGO("ScavengedPanel", parent);
+        var panel = MakeGO("PowerupPanel", parent);
         var rt    = panel.GetComponent<RectTransform>();
-        rt.anchorMin        = new Vector2(1, 0);
-        rt.anchorMax        = new Vector2(1, 1);
-        rt.pivot            = new Vector2(1, 0.5f);
-        rt.sizeDelta        = new Vector2(120, 0);
-        rt.anchoredPosition = new Vector2(-16, 0);
+        rt.anchorMin        = new Vector2(1f, 0f);
+        rt.anchorMax        = new Vector2(1f, 0f);
+        rt.pivot            = new Vector2(1f, 0f);
+        rt.sizeDelta        = new Vector2(78f, 96f);
+        rt.anchoredPosition = new Vector2(-14f, 8f);
 
-        var vlg = panel.AddComponent<VerticalLayoutGroup>();
-        vlg.spacing              = 4;
-        vlg.childAlignment       = TextAnchor.UpperCenter;
-        vlg.childControlWidth    = true;
-        vlg.childControlHeight   = false;
-        vlg.childForceExpandWidth  = true;
-        vlg.childForceExpandHeight = false;
-        vlg.padding = new RectOffset(0, 0, 8, 0);
+        var bg = MakeGO("BG", panel.transform);
+        StretchFull(bg);
+        AddImage(bg, Alpha(C_BG_DEEP, 0.85f));
+        var bgOutline         = bg.AddComponent<Outline>();
+        bgOutline.effectColor    = C_BORDER_DIM;
+        bgOutline.effectDistance = new Vector2(1f, -1f);
 
-        // "SCAVENGED" label
-        var topLabel = MakeGO("ScavengedLabel", panel.transform);
-        topLabel.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 18);
-        var tlTMP = AddTMP(topLabel, "SCAVENGED", 11, C_LABEL_DIM, FontStyles.Normal);
-        tlTMP.alignment        = TextAlignmentOptions.Center;
-        tlTMP.characterSpacing = 2f;
+        // "[E]" label
+        var klGO = MakeGO("KeyLabel", panel.transform);
+        var klRt = klGO.GetComponent<RectTransform>();
+        klRt.anchorMin        = new Vector2(0f, 1f);
+        klRt.anchorMax        = new Vector2(1f, 1f);
+        klRt.pivot            = new Vector2(0.5f, 1f);
+        klRt.sizeDelta        = new Vector2(0f, 17f);
+        klRt.anchoredPosition = new Vector2(0f, -3f);
+        AddTMP(klGO, "[E]", 11f, C_LABEL_DIM, FontStyles.Normal).alignment = TextAlignmentOptions.Center;
 
-        // Item slot
-        var slotGO = MakeGO("ItemSlot", panel.transform);
-        slotGO.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 72);
-        AddImage(slotGO, C_BG_MID);
-        var slotOutline = slotGO.AddComponent<Outline>();
-        slotOutline.effectColor    = C_BORDER_DIM;
-        slotOutline.effectDistance = new Vector2(1, -1);
+        // Icon area
+        var iaGO = MakeGO("IconArea", panel.transform);
+        var iaRt = iaGO.GetComponent<RectTransform>();
+        iaRt.anchorMin = new Vector2(0.1f, 0.1f);
+        iaRt.anchorMax = new Vector2(0.9f, 0.82f);
+        iaRt.offsetMin = Vector2.zero;
+        iaRt.offsetMax = Vector2.zero;
 
-        // "?" placeholder
-        var qGO  = MakeGO("QuestionMark", slotGO.transform);
-        StretchFull(qGO);
-        var qTMP = AddTMP(qGO, "?", 26, C_BORDER_DIM, FontStyles.Bold);
-        qTMP.alignment = TextAlignmentOptions.Center;
+        // Dim layer (always visible at half alpha)
+        var dimGO    = MakeGO("PowerupIcon_Dim", iaGO.transform);
+        StretchFull(dimGO);
+        var dimImg   = AddImage(dimGO, Alpha(C_POWERUP, 0.32f));
+        dimImg.preserveAspect = true;
 
-        // "EMPTY" label
-        var emptyGO = MakeGO("EmptyLabel", panel.transform);
-        emptyGO.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 16);
-        var eTMP = AddTMP(emptyGO, "EMPTY", 11, C_EMPTY, FontStyles.Normal);
-        eTMP.alignment        = TextAlignmentOptions.Center;
-        eTMP.characterSpacing = 2f;
+        // Fill layer (full alpha, grows bottom-to-top)
+        var fillGO     = MakeGO("PowerupIcon_Fill", iaGO.transform);
+        StretchFull(fillGO);
+        var fillRt     = fillGO.GetComponent<RectTransform>();
+        fillRt.pivot   = new Vector2(0.5f, 0f);
+        _powerupFillImg               = AddImage(fillGO, C_POWERUP);
+        _powerupFillImg.preserveAspect = true;
+        _powerupFillImg.type          = Image.Type.Filled;
+        _powerupFillImg.fillMethod    = Image.FillMethod.Vertical;
+        _powerupFillImg.fillOrigin    = (int)Image.OriginVertical.Bottom;
+        _powerupFillImg.fillAmount    = 1f;
+
+        // "READY" label
+        var rrGO = MakeGO("ReadyLabel", panel.transform);
+        var rrRt = rrGO.GetComponent<RectTransform>();
+        rrRt.anchorMin        = new Vector2(0f, 0f);
+        rrRt.anchorMax        = new Vector2(1f, 0f);
+        rrRt.pivot            = new Vector2(0.5f, 0f);
+        rrRt.sizeDelta        = new Vector2(0f, 13f);
+        rrRt.anchoredPosition = new Vector2(0f, 2f);
+        var rrTMP = AddTMP(rrGO, "READY", 10f, Alpha(C_POWERUP, 0.8f), FontStyles.Normal);
+        rrTMP.alignment        = TextAlignmentOptions.Center;
+        rrTMP.characterSpacing = 2f;
     }
 
     // ══════════════════════════════════════════════════════════
-    //  LOADOUT SLOT PREFAB
+    //  SCRIPT AUTO-ASSIGNMENT
     // ══════════════════════════════════════════════════════════
-    static void BuildLoadoutSlotPrefab()
+
+    static void AssignDialogueSystem(GameObject dialogueBoxGO)
     {
-        string prefabPath = "Assets/Prefabs/UI/LoadoutSlot.prefab";
+        var ds = dialogueBoxGO.AddComponent<DialogueSystem>();
+        var so = new SerializedObject(ds);
 
-        // Build the slot in a temp scene object, then save as prefab
-        var slot = new GameObject("LoadoutSlot");
-        slot.AddComponent<RectTransform>().sizeDelta = new Vector2(100, 100);
-        slot.AddComponent<Button>();
-        AddImage(slot, Hex("#0D1A28"));
+        so.FindProperty("dialogueBox")   .objectReferenceValue = dialogueBoxGO;
+        so.FindProperty("actorNameText") .objectReferenceValue = _actorNameTMP;
+        so.FindProperty("actorIcon")     .objectReferenceValue = _actorIconImg;
+        so.FindProperty("dialogueText")  .objectReferenceValue = _dialogueTextTMP;
+        so.FindProperty("cursor")        .objectReferenceValue = _cursorRT;
+        so.FindProperty("timerBarFill")  .objectReferenceValue = _timerBarFillImg;
+        so.FindProperty("continuePrompt").objectReferenceValue = _continuePromptGO;
 
-        var outline = slot.AddComponent<Outline>();
-        outline.effectColor    = Hex("#1E3A5F");
-        outline.effectDistance = new Vector2(1, -1);
+        so.ApplyModifiedProperties();
+        Debug.Log("[DialogueHUDBuilder] DialogueSystem references assigned.");
+    }
 
-        var weaponGO = MakeGO("WeaponIcon", slot.transform);
-        var wrt      = weaponGO.GetComponent<RectTransform>();
-        wrt.anchorMin = wrt.anchorMax = new Vector2(0.5f, 0.5f);
-        wrt.pivot     = new Vector2(0.5f, 0.5f);
-        wrt.sizeDelta = new Vector2(68, 48);
-        wrt.anchoredPosition = new Vector2(0, 10);
-        AddImage(weaponGO, Hex("#1E3A5F")).preserveAspect = true;
+    static void AssignPlayerHUD(GameObject hudGO)
+    {
+        var hud = hudGO.AddComponent<PlayerHUD>();
+        var so  = new SerializedObject(hud);
 
-        var labelGO = MakeGO("SlotLabel", slot.transform);
-        var lrt     = labelGO.GetComponent<RectTransform>();
-        lrt.anchorMin = new Vector2(0, 0); lrt.anchorMax = new Vector2(1, 0);
-        lrt.pivot     = new Vector2(0.5f, 0); lrt.sizeDelta = new Vector2(0, 18);
-        lrt.anchoredPosition = new Vector2(0, 6);
-        var lTMP = AddTMP(labelGO, "WEAPON [1]", 13, Hex("#2A6EA6"), FontStyles.Normal);
-        lTMP.alignment = TextAlignmentOptions.Center;
+        so.FindProperty("healthFill")        .objectReferenceValue = _healthFillImg;
+        so.FindProperty("healthText")        .objectReferenceValue = _healthValueTMP;
+        so.FindProperty("shieldFill")        .objectReferenceValue = _shieldFillImg;
+        so.FindProperty("shieldText")        .objectReferenceValue = _shieldValueTMP;
+        so.FindProperty("shieldActiveColor") .colorValue           = C_SHIELD;
+        so.FindProperty("shieldBrokenColor") .colorValue           = Alpha(C_SHIELD, 0.22f);
+        // playerHealth is on the Player GameObject — assign in Inspector
 
-        var dot = MakeGO("ActiveIndicator", slot.transform);
-        var drt = dot.GetComponent<RectTransform>();
-        drt.anchorMin = drt.anchorMax = new Vector2(0.5f, 0);
-        drt.pivot     = new Vector2(0.5f, 0);
-        drt.sizeDelta = new Vector2(4, 4);
-        drt.anchoredPosition = new Vector2(0, 1);
-        AddImage(dot, Hex("#4EB8E8"));
-        dot.SetActive(false);
+        so.ApplyModifiedProperties();
+        Debug.Log("[DialogueHUDBuilder] PlayerHUD references assigned (drag PlayerHealth manually).");
+    }
 
-        PrefabUtility.SaveAsPrefabAsset(slot, prefabPath);
-        Object.DestroyImmediate(slot);
+    static void AssignWeaponHUDController(GameObject hudGO)
+    {
+        var ctrl = hudGO.AddComponent<WeaponHUDController>();
+        var so   = new SerializedObject(ctrl);
 
-        Debug.Log($"[DialogueHUDBuilder] LoadoutSlot prefab saved to {prefabPath}");
+        var slotsProp = so.FindProperty("weaponSlots");
+        slotsProp.arraySize = 4;
+        for (int i = 0; i < 4; i++)
+            slotsProp.GetArrayElementAtIndex(i).objectReferenceValue = _weaponSlotGOs[i];
+
+        so.FindProperty("hexDisplay")   .objectReferenceValue = _hexDisplayGO;
+        so.FindProperty("hexWeaponIcon").objectReferenceValue = _hexWeaponIconImg;
+        so.FindProperty("hexWeaponName").objectReferenceValue = _hexWeaponNameTMP;
+
+        so.ApplyModifiedProperties();
+        Debug.Log("[DialogueHUDBuilder] WeaponHUDController references assigned.");
     }
 
     // ══════════════════════════════════════════════════════════
     //  HELPERS
     // ══════════════════════════════════════════════════════════
+
     static GameObject MakeGO(string name, Transform parent)
     {
         var go = new GameObject(name);
@@ -547,11 +595,11 @@ public static class DialogueHUDBuilder
 
     static void StretchFull(GameObject go)
     {
-        var rt        = go.GetComponent<RectTransform>();
-        rt.anchorMin  = Vector2.zero;
-        rt.anchorMax  = Vector2.one;
-        rt.offsetMin  = Vector2.zero;
-        rt.offsetMax  = Vector2.zero;
+        var rt       = go.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
     }
 
     static Image AddImage(GameObject go, Color color)
@@ -561,17 +609,17 @@ public static class DialogueHUDBuilder
         return img;
     }
 
-    static TextMeshProUGUI AddTMP(GameObject go, string text, float size,
-                                   Color color, FontStyles style)
+    static TextMeshProUGUI AddTMP(GameObject go, string text, float size, Color color, FontStyles style)
     {
-        var tmp        = go.AddComponent<TextMeshProUGUI>();
-        tmp.text       = text;
-        tmp.fontSize   = size;
-        tmp.color      = color;
-        tmp.fontStyle  = style;
-        // Font is intentionally left unassigned — assign in Inspector
+        var tmp       = go.AddComponent<TextMeshProUGUI>();
+        tmp.text      = text;
+        tmp.fontSize  = size;
+        tmp.color     = color;
+        tmp.fontStyle = style;
         return tmp;
     }
+
+    static Color Alpha(Color c, float a) { c.a = a; return c; }
 
     static void EnsurePrefabFolder()
     {
