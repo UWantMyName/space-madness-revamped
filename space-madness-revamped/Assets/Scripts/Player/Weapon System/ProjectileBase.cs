@@ -43,6 +43,13 @@ public abstract class ProjectileBase : MonoBehaviour
     // before Destroy() takes effect at end of frame
     private bool _hasHit = false;
 
+    [Header("Hit Effect")]
+    [Tooltip("HitEffect prefab to spawn on impact. Leave empty for no effect.")]
+    public GameObject hitEffectPrefab;
+
+    [Tooltip("Color of the hit effect. Leave as white to use the prefab's default color.")]
+    public Color hitEffectColor = Color.white;
+
     // ─────────────────────────────────────────────────────────────────────────
     //  Unity Lifecycle
     // ─────────────────────────────────────────────────────────────────────────
@@ -122,6 +129,7 @@ public abstract class ProjectileBase : MonoBehaviour
     {
         _hasHit = true;
         enemy.TakeDamage(Damage);
+        SpawnHitEffect();
         Destroy(gameObject);
     }
 
@@ -129,6 +137,23 @@ public abstract class ProjectileBase : MonoBehaviour
     {
         _hasHit = true;
         asteroid.TakeDamage(Damage);
+        SpawnHitEffect();
         Destroy(gameObject);
+    }
+
+    private void SpawnHitEffect()
+    {
+        if (hitEffectPrefab == null) return;
+
+        var go     = Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
+        var effect = go.GetComponent<HitEffect>();
+
+        if (effect != null)
+        {
+            if (hitEffectColor != Color.white)
+                effect.SetColor(hitEffectColor);
+
+            effect.Play();
+        }
     }
 }

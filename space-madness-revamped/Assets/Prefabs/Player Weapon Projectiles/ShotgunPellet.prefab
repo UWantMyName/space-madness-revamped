@@ -191,6 +191,8 @@ MonoBehaviour:
   speed: 30
   direction: {x: 0, y: 1}
   maxLifetime: 5
+  hitEffectPrefab: {fileID: 2046650116750559853, guid: e6df19777ece49c5b9eb10d754a960b6, type: 3}
+  hitEffectColor: {r: 1, g: 1, b: 1, a: 1}
   minFragments: 4
   maxFragments: 6
   fragmentPrefab: {fileID: 7168477602147300711, guid: cf819ef70a722e550acf2623f79b4144, type: 3}

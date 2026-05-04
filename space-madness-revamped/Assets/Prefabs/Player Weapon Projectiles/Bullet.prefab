@@ -182,3 +182,5 @@ MonoBehaviour:
   speed: 50
   direction: {x: 0, y: 1}
   maxLifetime: 5
+  hitEffectPrefab: {fileID: 2046650116750559853, guid: e6df19777ece49c5b9eb10d754a960b6, type: 3}
+  hitEffectColor: {r: 1, g: 1, b: 1, a: 1}
