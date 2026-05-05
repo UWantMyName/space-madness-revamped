@@ -19,6 +19,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 328607389382986706, guid: d02f8e799d4de5ec2a1ce617e56a786c, type: 3}
   firePointOffsets:
   - {x: 0, y: 0}
-  chargeTime: 1.5
+  chargeTime: 2
   maxChargeDamageMultiplier: 3
-  maxChargeScaleMultiplier: 2.5
+  maxChargeScaleMultiplier: 10
