@@ -1022,7 +1022,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 0}
+  m_BackGroundColor: {r: 0.009433985, g: 0.009433985, b: 0.009433985, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -5974,6 +5974,61 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2006106732}
   m_CullTransparentMesh: 1
+--- !u!1 &2094357948
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2094357949}
+  - component: {fileID: 2094357950}
+  m_Layer: 0
+  m_Name: GalaxyBackground
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2094357949
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094357948}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2094357950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2094357948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 749d0d200d8354757abb1c12626b1317, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GalaxyBackground
+  sceneCamera: {fileID: 519420031}
+  coldStarColor: {r: 0.75, g: 0.9, b: 1, a: 1}
+  warmStarColor: {r: 1, g: 0.95, b: 0.85, a: 1}
+  nebulaColorA: {r: 0.45, g: 0.2, b: 0.7, a: 1}
+  nebulaColorB: {r: 0.2, g: 0.1, b: 0.45, a: 1}
+  cometColor: {r: 0.8, g: 0.9, b: 1, a: 1}
+  distantStarCount: 160
+  nearStarCount: 40
+  nebulaCount: 12
+  cometInterval: 6
+  sortingLayerName: Background
 --- !u!1 &2108740124
 GameObject:
   m_ObjectHideFlags: 0
@@ -6221,3 +6276,4 @@ SceneRoots:
   - {fileID: 1203949560}
   - {fileID: 1666224213}
   - {fileID: 1006994649}
+  - {fileID: 2094357949}
