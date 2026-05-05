@@ -50,7 +50,8 @@ public class AlienHealth : MonoBehaviour
 
     private AlienController  _controller;
     private Animator         _animator;
-    private AlienHitReaction _hitReaction; // optional
+    private AlienHitReaction _hitReaction;
+    private AlienDeathEffect _deathEffect; // optional — code-driven death sequence
 
     // ─────────────────────────────────────────────────────────────────────────
     //  Unity Lifecycle
@@ -59,8 +60,9 @@ public class AlienHealth : MonoBehaviour
     private void Awake()
     {
         _controller  = GetComponent<AlienController>();
-        _animator    = GetComponent<Animator>();         // null if not present
-        _hitReaction = GetComponent<AlienHitReaction>(); // null if not present
+        _animator    = GetComponent<Animator>();
+        _hitReaction = GetComponent<AlienHitReaction>();
+        _deathEffect = GetComponent<AlienDeathEffect>();
     }
 
     private void Start()
@@ -94,7 +96,7 @@ public class AlienHealth : MonoBehaviour
 
     /// <summary>
     /// Overrides the max HP from the AlienDefinition.
-    /// Call this immediately after spawning, before any damage is dealt.
+    /// Call immediately after spawning, before any damage is dealt.
     /// Used by WaveManager when a chapter file specifies a health override.
     /// </summary>
     public void SetMaxHP(int newMaxHP)
@@ -107,7 +109,6 @@ public class AlienHealth : MonoBehaviour
     /// Safe to call multiple times — ignores hits after death.
     /// </summary>
     public void TakeDamage(int amount = 1)
-
     {
         if (IsDead) return;
 
@@ -131,20 +132,25 @@ public class AlienHealth : MonoBehaviour
     private IEnumerator DieRoutine()
     {
         IsDead = true;
-
-        // Stop the alien from moving and shooting
         _controller.enabled = false;
 
-        // Trigger death animation if an Animator is present
-        if (_animator != null)
-            _animator.SetTrigger(deathTrigger);
+        if (_deathEffect != null)
+        {
+            // Code-driven sequence — AlienDeathEffect calls back when done
+            bool done = false;
+            _deathEffect.Play(() => done = true);
+            yield return new WaitUntil(() => done);
+        }
+        else
+        {
+            // Fallback: Animator trigger + fixed wait (original behaviour)
+            if (_animator != null)
+                _animator.SetTrigger(deathTrigger);
 
-        // Wait for animation to finish
-        yield return new WaitForSeconds(deathAnimationDuration);
+            yield return new WaitForSeconds(deathAnimationDuration);
+        }
 
-        // Notify listeners (WaveManager) before destroying
         OnDeath?.Invoke();
-
         Destroy(gameObject);
     }
 }

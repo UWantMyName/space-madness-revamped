@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2528884660657293506}
   - component: {fileID: 3731557471800750730}
   - component: {fileID: 1720681845727674146}
+  - component: {fileID: 6457826655048768671}
   m_Layer: 0
   m_Name: Alien
   m_TagString: Alien
@@ -170,3 +171,23 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &6457826655048768671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1662140487908783671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b51722b53bf7c0138925bb3f35c9c4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AlienDeathEffect
+  flashDuration: 0.15
+  shakeMagnitude: 0.12
+  fragmentDuration: 0.5
+  fragmentCount: 12
+  fragmentSpeed: 4
+  fragmentSize: 0.18
+  inheritSpriteColor: 1
+  fragmentColor: {r: 1, g: 1, b: 1, a: 1}
