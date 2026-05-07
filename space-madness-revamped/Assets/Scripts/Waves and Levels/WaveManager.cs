@@ -22,8 +22,8 @@ public class WaveManager : MonoBehaviour
     [Header("Setup")]
     public LevelDefinition levelDefinition;
 
-    [Tooltip("Prefab that has AlienController (and SpriteRenderer) on it.")]
-    public GameObject alienPrefab;
+    [Tooltip("Prefabs with AlienController on them. One is picked at random per spawn.")]
+    public List<GameObject> alienPrefabs = new();
 
     [Tooltip("SlotManager in the scene. Its definition is swapped per wave.")]
     public SlotManager slotManager;
@@ -76,6 +76,11 @@ public class WaveManager : MonoBehaviour
             if (!Validate()) return;
             StartCoroutine(RunLevel());
         }
+    }
+
+    private GameObject GetRandomPrefab()
+    {
+        return alienPrefabs[Random.Range(0, alienPrefabs.Count)];
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -236,7 +241,7 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
-        GameObject go  = Instantiate(alienPrefab, Vector3.zero, Quaternion.identity);
+        GameObject go = Instantiate(GetRandomPrefab(), Vector3.zero, Quaternion.identity);
         go.name        = $"Alien_W{CurrentWaveIndex}_A{alienIndex}";
 
         var controller = go.GetComponent<AlienController>();
@@ -264,7 +269,7 @@ public class WaveManager : MonoBehaviour
 
     private void SpawnRuntimeAlien(AlienDefinition def, RuntimeGroupData group, int groupIndex, int alienIndex)
     {
-        GameObject go  = Instantiate(alienPrefab, Vector3.zero, Quaternion.identity);
+        GameObject go = Instantiate(GetRandomPrefab(), Vector3.zero, Quaternion.identity);
         go.name        = $"Alien_G{groupIndex}_A{alienIndex}";
 
         var controller = go.GetComponent<AlienController>();
@@ -335,9 +340,10 @@ public class WaveManager : MonoBehaviour
             return false;
         }
 
-        if (alienPrefab == null)
+        // Validate() and ValidateRuntime() — replace the alienPrefab null check with:
+        if (alienPrefabs == null || alienPrefabs.Count == 0)
         {
-            Debug.LogError("[WaveManager] No alien prefab assigned.", this);
+            Debug.LogError("[WaveManager] No alien prefabs assigned.", this);
             return false;
         }
 
@@ -352,9 +358,10 @@ public class WaveManager : MonoBehaviour
 
     private bool ValidateRuntime()
     {
-        if (alienPrefab == null)
+        // Validate() and ValidateRuntime() — replace the alienPrefab null check with:
+        if (alienPrefabs == null || alienPrefabs.Count == 0)
         {
-            Debug.LogError("[WaveManager] No alien prefab assigned.", this);
+            Debug.LogError("[WaveManager] No alien prefabs assigned.", this);
             return false;
         }
 

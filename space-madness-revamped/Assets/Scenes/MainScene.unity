@@ -936,7 +936,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
   levelDefinition: {fileID: 0}
-  alienPrefab: {fileID: 1662140487908783671, guid: 72ca7589603ac19b28a90e3b249734bd, type: 3}
+  alienPrefabs:
+  - {fileID: 1662140487908783671, guid: 72ca7589603ac19b28a90e3b249734bd, type: 3}
+  - {fileID: 20602025759010359, guid: bb39e222e1a4b2fc2a86f5cca46813ce, type: 3}
+  - {fileID: 3273573590559742026, guid: 3d8704c3225b30c6e94fe87dabec2a04, type: 3}
   slotManager: {fileID: 1508757574}
   alienDefinitionLibrary:
   - {fileID: 11400000, guid: f80e9b3bdf4c3edf5acdf27a6c57267c, type: 2}
@@ -6028,6 +6031,7 @@ MonoBehaviour:
   nearStarCount: 40
   nebulaCount: 12
   cometInterval: 6
+  scrollSpeed: 1.2
   sortingLayerName: Background
 --- !u!1 &2108740124
 GameObject:

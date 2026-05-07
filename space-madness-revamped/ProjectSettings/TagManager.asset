@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Alien
   - Projectile
+  - AlienBullet
   layers:
   - Default
   - TransparentFX
