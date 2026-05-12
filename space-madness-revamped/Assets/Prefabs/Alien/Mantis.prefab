@@ -186,7 +186,7 @@ MonoBehaviour:
   flashDuration: 0.15
   shakeMagnitude: 0.12
   fragmentDuration: 0.5
-  fragmentCount: 12
+  fragmentCount: 8
   fragmentSpeed: 4
   fragmentSize: 0.18
   inheritSpriteColor: 1

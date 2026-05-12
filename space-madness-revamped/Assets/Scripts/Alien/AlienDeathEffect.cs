@@ -53,7 +53,6 @@ public class AlienDeathEffect : MonoBehaviour
     private void Awake()
     {
         _renderer         = GetComponent<SpriteRenderer>();
-        _originalLocalPos = transform.localPosition;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -79,18 +78,18 @@ public class AlienDeathEffect : MonoBehaviour
         Color originalColor = _renderer.color;
 
         // ── Phase 1: Flash white + shake ──────────────────────────────────
+        // Phase 1: Flash white + shake
         float elapsed = 0f;
         while (elapsed < flashDuration)
         {
             float t         = elapsed / flashDuration;
             _renderer.color = Color.Lerp(Color.white, originalColor, t);
-            transform.localPosition = _originalLocalPos +
-                (Vector3)Random.insideUnitCircle * shakeMagnitude;
+            transform.position = worldPosition + (Vector3)Random.insideUnitCircle * shakeMagnitude;
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        transform.localPosition = _originalLocalPos;
+        transform.position = worldPosition; // restore, not localPosition
 
         // ── Phase 2: Fragments explode, sprite fades out ──────────────────
         Color baseColor = inheritSpriteColor ? originalColor : fragmentColor;

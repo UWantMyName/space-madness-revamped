@@ -134,6 +134,8 @@ public class AlienHealth : MonoBehaviour
         IsDead = true;
         _controller.enabled = false;
 
+        Debug.Log($"[DieRoutine] Position at controller disable: {transform.position}");
+
         if (_deathEffect != null)
         {
             // Code-driven sequence — AlienDeathEffect calls back when done
@@ -150,6 +152,7 @@ public class AlienHealth : MonoBehaviour
             yield return new WaitForSeconds(deathAnimationDuration);
         }
 
+        Debug.Log($"[DieRoutine] Position before OnDeath: {transform.position}");
         OnDeath?.Invoke();
         Destroy(gameObject);
     }
