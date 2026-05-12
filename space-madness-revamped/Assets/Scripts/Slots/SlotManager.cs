@@ -1,19 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Runtime slot manager.
-///
-/// Responsibilities:
-///   - Tracks which slots are occupied and which are free.
-///   - Assigns the next available slot to an alien on request.
-///   - Frees a slot when an alien dies (slot stays empty — not re-claimed).
-///   - Draws slot gizmos in the Scene view for authoring feedback.
-///
-/// Usage:
-///   Call SlotManager.AssignNextSlot(alienController) when spawning each alien.
-///   Call SlotManager.FreeSlot(alienController) when an alien dies.
-/// </summary>
 public class SlotManager : MonoBehaviour
 {
     // ─────────────────────────────────────────────────────────────────────────
@@ -23,27 +10,28 @@ public class SlotManager : MonoBehaviour
     [Header("Setup")]
     public SlotDefinition definition;
 
+    // NEW: safe-zone margins in world units
+    [Header("Safe Zone Margins (world units)")]
+    [SerializeField] private float marginLeft   = 2f;
+    [SerializeField] private float marginRight  = 2f;
+    [SerializeField] private float marginTop    = 1.5f;
+    [Tooltip("Keeps slots above this distance from screen centre — prevents aliens slotting near the player")]
+    [SerializeField] private float marginBottom = 3f;
+
     // ─────────────────────────────────────────────────────────────────────────
-    //  Private State
+    //  Private State (unchanged)
     // ─────────────────────────────────────────────────────────────────────────
 
-    // Maps slot index → the alien currently occupying it (null = free)
     private AlienController[] _occupants;
-
-    // Queue of slot indices not yet assigned, in order
-    private Queue<int> _availableSlots;
-
-    // Slot positions when driven at runtime (no SlotDefinition asset)
-    private Vector2[] _runtimeSlots;
+    private Queue<int>        _availableSlots;
+    private Vector2[]         _runtimeSlots;
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  Unity Lifecycle
+    //  Unity Lifecycle (unchanged)
     // ─────────────────────────────────────────────────────────────────────────
 
     private void Awake()
     {
-        // Definition may be null if this SlotManager is driven at runtime via SetRuntimeSlots().
-        // WaveManager will call SetRuntimeSlots() before any slots are needed in that case.
         if (definition != null)
             Initialise();
     }
@@ -52,17 +40,9 @@ public class SlotManager : MonoBehaviour
     //  Public API
     // ─────────────────────────────────────────────────────────────────────────
 
-    /// <summary>How many slots are still unassigned.</summary>
-    public int AvailableSlotCount => _availableSlots.Count;
+    public int  AvailableSlotCount => _availableSlots.Count;
+    public bool AllSlotsAssigned   => _availableSlots.Count == 0;
 
-    /// <summary>True if every slot has been assigned at least once.</summary>
-    public bool AllSlotsAssigned => _availableSlots.Count == 0;
-
-    /// <summary>
-    /// Initialises the slot manager from a runtime-generated array of positions.
-    /// Use this when running from RuntimeLevelData instead of a SlotDefinition asset.
-    /// Replaces any previously assigned definition or runtime slots.
-    /// </summary>
     public void SetRuntimeSlots(Vector2[] positions)
     {
         if (positions == null || positions.Length == 0)
@@ -71,8 +51,13 @@ public class SlotManager : MonoBehaviour
             return;
         }
 
+        // NEW: clamp every incoming position to the camera safe zone
+        Rect safe = CalcSafeZone();
+        for (int i = 0; i < positions.Length; i++)
+            positions[i] = ClampToRect(positions[i], safe);
+
         _runtimeSlots = positions;
-        definition    = null; // runtime mode — no ScriptableObject needed
+        definition    = null;
 
         int count       = _runtimeSlots.Length;
         _occupants      = new AlienController[count];
@@ -82,11 +67,6 @@ public class SlotManager : MonoBehaviour
             _availableSlots.Enqueue(i);
     }
 
-    /// <summary>
-    /// Assigns the next available slot to the given alien.
-    /// Sets AlienController.SlotPosition and returns true on success.
-    /// Returns false if no slots remain.
-    /// </summary>
     public bool AssignNextSlot(AlienController alien)
     {
         if (alien == null)
@@ -103,17 +83,16 @@ public class SlotManager : MonoBehaviour
 
         int index         = _availableSlots.Dequeue();
         _occupants[index] = alien;
-        alien.SlotPosition = _runtimeSlots != null
-            ? _runtimeSlots[index]
-            : definition.slots[index];
+
+        // NEW: clamp at assignment time as a second safety net
+        //      (covers SlotDefinition assets that weren't authored with margins in mind)
+        Rect safe            = CalcSafeZone();
+        Vector2 rawPos       = _runtimeSlots != null ? _runtimeSlots[index] : definition.slots[index];
+        alien.SlotPosition   = ClampToRect(rawPos, safe);
 
         return true;
     }
 
-    /// <summary>
-    /// Marks the slot occupied by this alien as empty.
-    /// Called when an alien dies. The slot is NOT returned to the available queue.
-    /// </summary>
     public void FreeSlot(AlienController alien)
     {
         if (alien == null) return;
@@ -130,17 +109,48 @@ public class SlotManager : MonoBehaviour
         Debug.LogWarning($"[SlotManager] FreeSlot: alien '{alien.name}' was not found in any slot.");
     }
 
-    /// <summary>
-    /// Resets all slots back to unassigned.
-    /// Call this at the start of a new wave or level.
-    /// </summary>
-    public void ResetSlots()
-    {
-        Initialise();
-    }
+    public void ResetSlots() => Initialise();
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  Private
+    //  NEW: Safe Zone Helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns the world-space rectangle within which slots are permitted.
+    /// Derived from Camera.main's orthographic bounds minus inspector margins.
+    /// </summary>
+    private Rect CalcSafeZone()
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+        {
+            Debug.LogWarning("[SlotManager] No Camera.main found — safe zone defaulting to ±8 / 0..6.");
+            return new Rect(-8f, 0f, 16f, 6f);
+        }
+
+        float halfH = cam.orthographicSize;
+        float halfW = halfH * cam.aspect;
+        Vector3 cp  = cam.transform.position;
+
+        float left   = cp.x - halfW + marginLeft;
+        float right  = cp.x + halfW - marginRight;
+        float top    = cp.y + halfH - marginTop;
+        float bottom = cp.y         + marginBottom;  // floor sits above screen centre
+
+        // Prevent inverted rect if margins are too large
+        if (left  >= right)  { float mid = (left + right)   * 0.5f; left   = mid - 0.5f; right = mid + 0.5f; }
+        if (bottom >= top)   { float mid = (bottom + top)   * 0.5f; bottom = mid - 0.5f; top   = mid + 0.5f; }
+
+        return Rect.MinMaxRect(left, bottom, right, top);
+    }
+
+    private static Vector2 ClampToRect(Vector2 pos, Rect rect) =>
+        new Vector2(
+            Mathf.Clamp(pos.x, rect.xMin, rect.xMax),
+            Mathf.Clamp(pos.y, rect.yMin, rect.yMax));
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Private (unchanged)
     // ─────────────────────────────────────────────────────────────────────────
 
     private void Initialise()
@@ -154,25 +164,31 @@ public class SlotManager : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  Gizmos
+    //  Gizmos — now also draws the safe zone boundary
     // ─────────────────────────────────────────────────────────────────────────
 
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        if (definition == null || definition.slots == null) return;
+        // NEW: draw the safe zone as a cyan wireframe rectangle
+        Rect safe = CalcSafeZone();
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(
+            new Vector3(safe.center.x, safe.center.y, 0f),
+            new Vector3(safe.width,    safe.height,   0f));
 
-        for (int i = 0; i < definition.slots.Length; i++)
+        // Existing slot spheres (unchanged logic)
+        Vector2[] source = _runtimeSlots ?? definition?.slots;
+        if (source == null) return;
+
+        for (int i = 0; i < source.Length; i++)
         {
-            Vector3 pos = new Vector3(definition.slots[i].x, definition.slots[i].y, 0f);
+            Vector3 pos      = new Vector3(source[i].x, source[i].y, 0f);
+            bool    occupied = _occupants != null && i < _occupants.Length && _occupants[i] != null;
 
-            bool occupied = _occupants != null && i < _occupants.Length && _occupants[i] != null;
-
-            // Yellow = free · Red = occupied
             Gizmos.color = occupied ? Color.red : Color.yellow;
             Gizmos.DrawWireSphere(pos, 0.15f);
 
-            // Draw slot index label
             UnityEditor.Handles.color = Color.white;
             UnityEditor.Handles.Label(pos + Vector3.up * 0.25f, $"S{i}");
         }
