@@ -266,6 +266,7 @@ public class ChapterParser : MonoBehaviour
         group.BatchSize             = ParseInt  (kv, "batch_size",    5);
         group.DelayBeforeFirstBatch = ParseFloat(kv, "delay_first",   0.5f);
         group.DelayBetweenBatches   = ParseFloat(kv, "delay_between", 1.5f);
+        group.StartDelay            = ParseFloat(kv, "start_delay",   0f);
 
         int i = startLine + 1;
         while (i < endLine)

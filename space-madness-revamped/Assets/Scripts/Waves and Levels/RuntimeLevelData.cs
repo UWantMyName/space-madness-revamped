@@ -81,4 +81,10 @@ public class RuntimeGroupData
     /// Built by the ChapterParser from the PATH block.
     /// </summary>
     public AlienRuntimePath Path;
+
+    /// <summary>
+    /// Seconds after level start before this group
+    /// begins spawning
+    /// </summary>
+    public float StartDelay = 0f;
 }

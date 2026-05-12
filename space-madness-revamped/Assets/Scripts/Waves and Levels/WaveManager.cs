@@ -93,19 +93,7 @@ public class WaveManager : MonoBehaviour
     /// </summary>
     public void StartLevel(RuntimeLevelData data)
     {
-        if (data == null)
-        {
-            Debug.LogError("[WaveManager] StartLevel called with null RuntimeLevelData.", this);
-            return;
-        }
-
-        if (!ValidateRuntime()) return;
-
-        StopAllCoroutines();
-        LevelComplete    = false;
-        CurrentWaveIndex = -1;
-
-        StartCoroutine(RunRuntimeLevel(data));
+        StartCoroutine(RunLevel(data));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -117,12 +105,73 @@ public class WaveManager : MonoBehaviour
         for (int i = 0; i < levelDefinition.WaveCount; i++)
         {
             yield return RunWave(i);
-            yield return new WaitForSeconds(levelDefinition.delayBetweenWaves);
+
+            if (i < levelDefinition.WaveCount - 1)
+                yield return new WaitForSeconds(levelDefinition.delayBetweenWaves);
         }
 
         LevelComplete = true;
         OnLevelComplete?.Invoke();
         Debug.Log("[WaveManager] Level complete.");
+    }
+
+    private IEnumerator RunLevel(RuntimeLevelData data)
+    {
+        // Count total aliens across all groups so the slot pool covers everyone
+        int totalAliens = 0;
+        foreach (var g in data.Groups) totalAliens += g.Count;
+
+        Vector2[] slots = SlotGridGenerator.Generate(totalAliens);
+        slotManager.SetRuntimeSlots(slots);          // set once — not per-group
+
+        int remaining = data.Groups.Count;
+
+        foreach (var group in data.Groups)
+            StartCoroutine(RunGroup(group, () => remaining--));
+
+        yield return new WaitUntil(() => remaining <= 0);
+        yield return new WaitUntil(() =>
+            FindObjectsByType<AlienController>(FindObjectsSortMode.None).Length == 0);
+
+        LevelComplete = true;
+        OnLevelComplete?.Invoke();
+        Debug.Log("[WaveManager] Runtime level complete.");
+    }
+
+    private IEnumerator RunGroup(RuntimeGroupData group, System.Action onDone)
+    {
+        if (group.StartDelay > 0f)
+            yield return new WaitForSeconds(group.StartDelay);
+
+        // Resolve definition here — each group may use a different alien type
+        AlienDefinition def = FindDefinition(group.AlienDefinitionName);
+        if (def == null)
+        {
+            Debug.LogError($"[WaveManager] AlienDefinition '{group.AlienDefinitionName}' not found. Skipping group.");
+            onDone?.Invoke();
+            yield break;
+        }
+
+        if (group.DelayBeforeFirstBatch > 0f)
+            yield return new WaitForSeconds(group.DelayBeforeFirstBatch);
+
+        int spawned     = 0;
+        int alienIndex  = 0;
+
+        while (spawned < group.Count)
+        {
+            int batchCount = Mathf.Min(group.BatchSize, group.Count - spawned);
+
+            for (int i = 0; i < batchCount; i++)
+                SpawnRuntimeAlien(def, group, CurrentWaveIndex, alienIndex++);
+
+            spawned += batchCount;
+
+            if (spawned < group.Count)
+                yield return new WaitForSeconds(group.DelayBetweenBatches);
+        }
+
+        onDone?.Invoke();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -1,9 +1,7 @@
 // ============================================================
-//  Chapter 1 — First Contact (Extended Test)
-//  Multiple levels, large alien counts, many characters
+//  Chapter 1 — First Contact
 // ============================================================
 
-// Opening transmission
 COMMAND: Apophis, do you copy?
 PLAYER: Loud and clear, sir. What's the situation?
 COMMAND: We have inbound hostiles. Three groups, approaching fast.
@@ -12,33 +10,35 @@ NAVIGATOR: Apophis, I'm tracking them on radar. They're coming in from the north
 PLAYER: Copy that, Navigator. I see them.
 
 // ============================================================
-//  LEVEL 1 — Scout Wave (20 aliens, 3 groups)
+//  LEVEL 1 — Scout Wave
+//  Design: all three groups open at once (immediate 3-direction pressure).
+//          A second flanker pair ambushes at t=6 when the player thinks
+//          the opening rush is winding down.
 // ============================================================
-
 [LEVEL_START | delay_between_waves: 2.0]
 
-    // Group 1 — 8 scouts diving straight down across the full width
-    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+    // t=0 — scouts dive straight down the centre
+    [GROUP | count: 8 | batch_size: 4 | start_delay: 0 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 2
         PATH
-            SPAWN | edge: top | position: 0.2
+            SPAWN | edge: top | position: 0.5
             [SEG | type: linear | angle: 270 | distance: 0.5 | speed: 7]
         PATH_END
     GROUP_END
 
-    // Group 2 — 6 flankers entering from the left, sweeping right
-    [GROUP | count: 6 | batch_size: 3 | delay_first: 0.5 | delay_between: 1.5]
+    // t=0 — left flankers open with the scouts (instant pincer)
+    [GROUP | count: 6 | batch_size: 3 | start_delay: 0 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 3
         PATH
             SPAWN | edge: left | position: 0.7
-            [SEG | type: linear | angle: 0   | distance: 0.2 | speed: 5]
-            [SEG | type: arc    | turn: right | sweep: 90    | distance: 0.3 | speed: 5]
-            [SEG | type: linear | angle: 270  | distance: 0.3 | speed: 5]
+            [SEG | type: linear | angle: 0    | distance: 0.2 | speed: 5]
+            [SEG | type: arc    | turn: right  | sweep: 90    | distance: 0.3 | speed: 5]
+            [SEG | type: linear | angle: 270   | distance: 0.3 | speed: 5]
         PATH_END
     GROUP_END
 
-    // Group 3 — 6 flankers entering from the right, sweeping left
-    [GROUP | count: 6 | batch_size: 3 | delay_first: 0.5 | delay_between: 1.5]
+    // t=0 — right flankers mirror the left (3-way opening)
+    [GROUP | count: 6 | batch_size: 3 | start_delay: 0 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 3
         PATH
             SPAWN | edge: right | position: 0.7
@@ -48,9 +48,30 @@ PLAYER: Copy that, Navigator. I see them.
         PATH_END
     GROUP_END
 
+    // t=6 — second flanker pair ambushes while the player mops up
+    [GROUP | count: 5 | batch_size: 3 | start_delay: 6 | delay_first: 0 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 2
+        PATH
+            SPAWN | edge: left | position: 0.5
+            [SEG | type: linear | angle: 0    | distance: 0.15 | speed: 6]
+            [SEG | type: arc    | turn: right  | sweep: 60     | distance: 0.25 | speed: 6]
+            [SEG | type: linear | angle: 270   | distance: 0.35 | speed: 6]
+        PATH_END
+    GROUP_END
+
+    // t=6 — mirror ambush from the right (simultaneous surprise)
+    [GROUP | count: 5 | batch_size: 3 | start_delay: 6 | delay_first: 0 | delay_between: 1.5]
+        ALIEN | type: FastAlien | health: 2
+        PATH
+            SPAWN | edge: right | position: 0.5
+            [SEG | type: linear | angle: 180  | distance: 0.15 | speed: 6]
+            [SEG | type: arc    | turn: left   | sweep: 60     | distance: 0.25 | speed: 6]
+            [SEG | type: linear | angle: 270   | distance: 0.35 | speed: 6]
+        PATH_END
+    GROUP_END
+
 [LEVEL_END]
 
-// Post-level 1 dialogue
 PLAYER: First wave down. That was almost too easy.
 COMMAND: Don't get comfortable. Intel says there's a second wave inbound — much heavier.
 ENGINEER: Commander, I'm reading elevated energy signatures. These aren't scouts anymore.
@@ -58,25 +79,27 @@ COMMAND: Noted. Apophis, prepare for heavy contact.
 PLAYER: Ready when they are.
 
 // ============================================================
-//  LEVEL 2 — Heavy Assault (35 aliens, 4 groups)
+//  LEVEL 2 — Heavy Assault
+//  Design: heavies drop through the centre while the pincer (groups 2+3)
+//          hits simultaneously — the player must choose what to shoot.
+//          The S-curve ambush (group 4) fires at t=6, mid-fight.
 // ============================================================
-
 [LEVEL_START | delay_between_waves: 2.5]
 
-    // Group 1 — 10 heavies, slow and tanky, straight down the middle
-    [GROUP | count: 10 | batch_size: 5 | delay_first: 1.0 | delay_between: 2.0]
+    // t=0 — slow tanky heavies grind down the middle
+    [GROUP | count: 10 | batch_size: 5 | start_delay: 0 | delay_first: 1.0 | delay_between: 2.0]
         ALIEN | type: FastAlien | health: 8
         PATH
             SPAWN | edge: top | position: 0.5
-            [SEG | type: linear | angle: 270 | distance: 0.3 | speed: 3]
-            [SEG | type: arc    | turn: left  | sweep: 30    | distance: 0.15 | speed: 3]
-            [SEG | type: arc    | turn: right  | sweep: 60   | distance: 0.2  | speed: 3]
-            [SEG | type: linear | angle: 270   | distance: 0.2 | speed: 3]
+            [SEG | type: linear | angle: 270  | distance: 0.3  | speed: 3]
+            [SEG | type: arc    | turn: left   | sweep: 30     | distance: 0.15 | speed: 3]
+            [SEG | type: arc    | turn: right   | sweep: 60    | distance: 0.2  | speed: 3]
+            [SEG | type: linear | angle: 270    | distance: 0.2 | speed: 3]
         PATH_END
     GROUP_END
 
-    // Group 2 — 8 fast attackers diving in a sharp arc from top-left
-    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+    // t=0 — fast attackers dive from top-left the moment heavies appear
+    [GROUP | count: 8 | batch_size: 4 | start_delay: 0 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 4
         PATH
             SPAWN | edge: top | position: 0.15
@@ -86,8 +109,8 @@ PLAYER: Ready when they are.
         PATH_END
     GROUP_END
 
-    // Group 3 — 8 fast attackers diving in a sharp arc from top-right
-    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+    // t=0 — mirror pincer from top-right (player split three ways instantly)
+    [GROUP | count: 8 | batch_size: 4 | start_delay: 0 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 4
         PATH
             SPAWN | edge: top | position: 0.85
@@ -97,8 +120,8 @@ PLAYER: Ready when they are.
         PATH_END
     GROUP_END
 
-    // Group 4 — 9 units entering from left in a wide S-curve
-    [GROUP | count: 9 | batch_size: 3 | delay_first: 0.5 | delay_between: 1.0]
+    // t=6 — S-curve ambush from the left while the player is deep in the fight
+    [GROUP | count: 9 | batch_size: 3 | start_delay: 6 | delay_first: 0.5 | delay_between: 1.0]
         ALIEN | type: FastAlien | health: 5
         PATH
             SPAWN | edge: left | position: 0.8
@@ -111,7 +134,6 @@ PLAYER: Ready when they are.
 
 [LEVEL_END]
 
-// Asteroid warning dialogue
 NAVIGATOR: Debris field detected ahead. Large rocks, Apophis — watch yourself.
 PLAYER: How bad are we talking?
 ENGINEER: Bad. I'm counting at least a dozen large ones with smaller fragments trailing behind.
@@ -122,23 +144,25 @@ COMMAND: Focus, both of you. Apophis, punch through that field.
 // ============================================================
 //  ASTEROID LEVEL — Dense Field
 // ============================================================
-
 [LEVEL: asteroids | nr_small: 15 | nr_medium: 8 | nr_large: 4]
 
-// Post-asteroid dialogue
 PLAYER: Field's clear. Taking some hull damage but shields held.
 ENGINEER: I'm seeing stress fractures on the port side. Nothing critical, but don't push it.
 COMMAND: Understood. But we don't have a choice — there's a third wave.
 PLAYER: Of course there is.
 
 // ============================================================
-//  LEVEL 3 — Final Push (50 aliens, 5 groups)
+//  LEVEL 3 — Final Push
+//  Design: double pincer opens at t=0 (chaotic and wide).
+//          Elite heavies punch through the middle at t=4 while
+//          the player is tracking the pincer.
+//          A fresh sweep from both flanks hits at t=10 —
+//          just when the player expects a break.
 // ============================================================
-
 [LEVEL_START | delay_between_waves: 3.0]
 
-    // Group 1 — 12 fast units, pincer from both top corners simultaneously
-    [GROUP | count: 12 | batch_size: 6 | delay_first: 0.5 | delay_between: 1.5]
+    // t=0 — fast pincer from top-left
+    [GROUP | count: 12 | batch_size: 6 | start_delay: 0 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 3
         PATH
             SPAWN | edge: top | position: 0.1
@@ -148,8 +172,8 @@ PLAYER: Of course there is.
         PATH_END
     GROUP_END
 
-    // Group 2 — mirror of group 1 from the right
-    [GROUP | count: 12 | batch_size: 6 | delay_first: 0.5 | delay_between: 1.5]
+    // t=0 — mirror pincer from top-right (simultaneous double threat)
+    [GROUP | count: 12 | batch_size: 6 | start_delay: 0 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 3
         PATH
             SPAWN | edge: top | position: 0.9
@@ -159,21 +183,21 @@ PLAYER: Of course there is.
         PATH_END
     GROUP_END
 
-    // Group 3 — 8 elite heavies down the centre, wide zigzag
-    [GROUP | count: 8 | batch_size: 2 | delay_first: 1.0 | delay_between: 1.5]
+    // t=4 — elite heavies bulldoze through the centre mid-pincer
+    [GROUP | count: 8 | batch_size: 2 | start_delay: 4 | delay_first: 1.0 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 10
         PATH
             SPAWN | edge: top | position: 0.5
             [SEG | type: linear | angle: 270  | distance: 0.15 | speed: 3]
             [SEG | type: arc    | turn: left   | sweep: 60     | distance: 0.2 | speed: 3]
-            [SEG | type: arc    | turn: right   | sweep: 120    | distance: 0.3 | speed: 3]
-            [SEG | type: arc    | turn: left    | sweep: 60     | distance: 0.2 | speed: 3]
+            [SEG | type: arc    | turn: right   | sweep: 120   | distance: 0.3 | speed: 3]
+            [SEG | type: arc    | turn: left    | sweep: 60    | distance: 0.2 | speed: 3]
             [SEG | type: linear | angle: 270    | distance: 0.15 | speed: 3]
         PATH_END
     GROUP_END
 
-    // Group 4 — 10 units sweeping from the left in a graceful arc
-    [GROUP | count: 10 | batch_size: 5 | delay_first: 0.5 | delay_between: 1.5]
+    // t=10 — fresh sweep from the left, player expecting a breather
+    [GROUP | count: 10 | batch_size: 5 | start_delay: 10 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 5
         PATH
             SPAWN | edge: left | position: 0.6
@@ -183,8 +207,8 @@ PLAYER: Of course there is.
         PATH_END
     GROUP_END
 
-    // Group 5 — 8 units sweeping from the right in a mirror arc
-    [GROUP | count: 8 | batch_size: 4 | delay_first: 0.5 | delay_between: 1.5]
+    // t=10 — mirror sweep from the right (simultaneous with group 4)
+    [GROUP | count: 8 | batch_size: 4 | start_delay: 10 | delay_first: 0.5 | delay_between: 1.5]
         ALIEN | type: FastAlien | health: 5
         PATH
             SPAWN | edge: right | position: 0.6
@@ -196,7 +220,6 @@ PLAYER: Of course there is.
 
 [LEVEL_END]
 
-// Closing sequence — full cast
 COMMAND: Apophis, all hostiles eliminated. Exceptional work.
 PLAYER: Just doing my job, sir.
 NAVIGATOR: For what it's worth, I had you at forty percent survival odds going into that last wave.
